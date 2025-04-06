@@ -1,2 +1,6 @@
 # .gitignore
-node_modules/
+node_modules
+.env
+.DS_Store
+/public/css/output.css
+
