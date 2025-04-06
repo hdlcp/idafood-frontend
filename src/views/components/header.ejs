@@ -1,0 +1,34 @@
+  <!-- TailwindCSS -->
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script>
+    tailwind.config = {
+      theme: {
+        extend: {
+          colors: {
+            'ida-gold': '#c3831e',
+          }
+        }
+      }
+    }
+  </script>
+
+  <!-- Font Awesome via CDN -->
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" />
+
+  <!-- Header -->
+  <div class="relative bg-ida-gold text-white px-4 py-3 rounded-b-3xl shadow-md flex items-center justify-between">
+    <!-- Icône menu -->
+    <button id="menu-toggle" class="text-white">
+      <i class="fas fa-bars text-2xl"></i>
+    </button>
+
+    <!-- User info -->
+    <div class="flex items-center gap-4">
+      <div class="text-right">
+        <p class="font-bold text-sm leading-none"><%= utilisateur.nom %></p>
+        <p class="text-xs font-bold text-black leading-none mt-1"><%= utilisateur.role %></p>
+      </div>
+  
+      <!-- User icon -->
+      <i class="fas fa-user-circle text-2xl text-black"></i>
+    </div>

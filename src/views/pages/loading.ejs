@@ -1,0 +1,40 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <script src="https://cdn.tailwindcss.com"></script>
+    <title>Chargement...</title>
+    <link rel="stylesheet" href="/css/loading.css">
+</head>
+<body class="bg-black flex items-center justify-center h-screen relative">
+    <!-- Logo centré -->
+    <div class="absolute top-1/4 flex justify-center w-full">
+        <img src="/images/logoIda.png" alt="Logo" class="w-56 md:w-64 h-auto object-contain">
+    </div>
+    
+    <!-- Spinner au centre -->
+    <!-- Spinner légèrement plus bas -->
+<div class="dot-spinner absolute top-[55%] left-1/2 transform -translate-x-1/2 -translate-y-1/2">
+        <div class="dot-spinner__dot"></div>
+        <div class="dot-spinner__dot"></div>
+        <div class="dot-spinner__dot"></div>
+        <div class="dot-spinner__dot"></div>
+        <div class="dot-spinner__dot"></div>
+        <div class="dot-spinner__dot"></div>
+        <div class="dot-spinner__dot"></div>
+        <div class="dot-spinner__dot"></div>
+    </div>
+    
+    <!-- Image des fruits en bas -->
+    <div class="absolute bottom-0 w-full">
+        <img src="/images/fruite.png" alt="Fruit" class="w-full h-auto object-contain opacity-90">
+    </div>
+
+    <script>
+        setTimeout(() => {
+            window.location.href = "/login";
+        }, 5000);
+    </script>
+</body>
+</html>

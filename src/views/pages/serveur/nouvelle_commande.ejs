@@ -1,0 +1,73 @@
+<!-- src/views/pages/nouvelle_commande.ejs -->
+<!DOCTYPE html>
+<html lang="fr">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://kit.fontawesome.com/your-kit-id.js" crossorigin="anonymous"></script>
+    <title>Nouvelle Commande - IDA Food</title>
+    <style>
+      .scrollbar-hide::-webkit-scrollbar {
+        display: none;
+      }
+      .scrollbar-hide {
+        -ms-overflow-style: none;
+        scrollbar-width: none;
+      }
+    </style>
+
+  </head>
+  <body class="bg-[#f2f2f2] min-h-screen flex flex-col"></body>
+        <!-- Header -->
+        <header>
+          <%- include('../../components/header') %>
+          <%- include('../../components/menu') %>
+        </header>
+       
+
+
+   <!-- CONTENU PRINCIPAL -->
+   <main class="flex-1 p-4 flex flex-col justify-center items-center text-center">
+    <p id="empty-message" class="text-gray-500 mb-8 text-sm">Aucun article sélectionné</p>
+    
+    <!-- Input motif -->
+    <textarea 
+      id="motif" 
+      placeholder="Motif de la commande"
+      class="w-full max-w-md p-3 rounded-xl shadow bg-white text-sm resize-none"
+      rows="3"
+    ></textarea>
+  </main>
+
+  <!-- FOOTER -->
+  <footer class="bg-white p-4 rounded-t-xl shadow-md flex items-center justify-between">
+    <p class="text-lg font-bold">Total : <span id="total">0</span> FCFA</p>
+    <div class="flex items-center space-x-2">
+      <button 
+        id="submit-btn"
+        class="bg-[#9B9BFF] text-white font-bold text-sm px-4 py-2 rounded-xl disabled:opacity-50"
+        disabled
+      >
+        Passer la commande
+      </button>
+      <button
+  onclick="toggleMenu()"
+  class="bg-ida-gold text-white font-extrabold text-2xl w-10 h-9 rounded-full flex items-center justify-center leading-none shadow-lg"
+>
+  +
+</button>
+
+    </div>
+  </footer>
+
+  <!-- SCRIPTS -->
+  <script src="https://kit.fontawesome.com/83eaa4b7f0.js" crossorigin="anonymous"></script>
+  <script>
+    function toggleMenu() {
+      // Ici tu peux ouvrir le menu latéral ou afficher la liste des plats
+      alert("Ouvrir le menu !");
+    }
+  </script>
+</body>
+</html>

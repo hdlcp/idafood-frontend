@@ -1,0 +1,111 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Connexion | IDA FOOD</title>
+    
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        'ida-gold': '#c3831e',
+                        'ida-dark': '#1a1a1a'
+                    }
+                }
+            }
+        }
+    </script>
+    
+    <!-- Font Awesome -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+</head>
+<body class="bg-ida-dark flex flex-col items-center min-h-screen">
+    <!-- Logo descendu -->
+    <div class="mt-32 mb-10"> <!-- Augmentation de la marge top -->
+        <img src="/images/logoIda.png" alt="Logo IDA FOOD" class="w-40 md:w-48 h-auto">
+    </div>
+
+    <!-- Conteneur du formulaire élargi -->
+    <div class="bg-white w-full max-w-none md:max-w-md rounded-t-3xl p-8 mt-auto shadow-lg mx-auto"> 
+        <h2 class="text-center text-xl font-bold text-gray-800 mb-8">
+            Connectez-vous pour pouvoir continuer
+        </h2>
+
+        <form id="login-form" class="flex flex-col space-y-6">
+            <!-- Champ Nom d'utilisateur -->
+            <div class="relative">
+                <span class="absolute left-4 top-1/2 transform -translate-y-1/2 text-ida-gold text-lg">
+                    <i class="fas fa-user"></i>
+                </span>
+                <input type="text" id="username" placeholder="Nom d'utilisateur"
+                    class="pl-12 pr-4 py-4 w-full bg-gray-100 text-gray-800 rounded-xl focus:outline-none focus:ring-2 focus:ring-ida-gold focus:bg-white transition">
+            </div>
+
+            <!-- Champ Mot de Passe -->
+            <div class="relative">
+                <span class="absolute left-4 top-1/2 transform -translate-y-1/2 text-ida-gold text-lg">
+                    <i class="fas fa-lock"></i>
+                </span>
+                <input type="password" id="password" placeholder="Mot de passe"
+                    class="pl-12 pr-4 py-4 w-full bg-gray-100 text-gray-800 rounded-xl focus:outline-none focus:ring-2 focus:ring-ida-gold focus:bg-white transition">
+            </div>
+
+            <!-- Sélection du rôle -->
+<div class="relative w-full">
+    <span class="absolute left-4 top-1/2 transform -translate-y-1/2 text-ida-gold text-lg">
+        <i class="fas fa-user-tag"></i>
+    </span>
+    <select id="role" class="pl-12 pr-10 py-4 w-full bg-gray-100 text-gray-800 rounded-xl focus:outline-none 
+        focus:ring-2 focus:ring-ida-gold focus:bg-white appearance-none transition">
+        <option value="" disabled selected>Choisissez votre rôle</option>
+        <option  value="serveur">Serveur</option>
+        <option  value="caissier">Caissier</option>
+        <option value="cuisinier">Cuisinier</option>
+        <option value="admin">Administrateur</option>
+    </select>
+      
+    <!-- Avec animation au hover/focus -->
+<span class="absolute right-3 top-1/2 transform -translate-y-1/2 text-ida-gold pointer-events-none transition-transform duration-200 group-hover:translate-y-0.5">
+    <svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"/>
+    </svg>
+</span>
+
+</div>
+
+
+            <!-- Bouton de connexion -->
+            <button type="submit" class="bg-ida-gold hover:bg-yellow-600 text-white py-4 rounded-xl font-bold text-lg shadow-md transition transform hover:scale-[1.02]">
+                Se connecter
+                <i class="fas fa-sign-in-alt ml-2"></i>
+            </button>
+        </form>
+
+        <script>
+            document.getElementById('login-form').addEventListener('submit', function (e) {
+              e.preventDefault(); // Empêche l'envoi du formulaire normal
+          
+              const username = document.getElementById('username').value.trim();
+              const password = document.getElementById('password').value.trim();
+              const role = document.getElementById('role').value;
+          
+              if (username && password && role) {
+                if (role === 'serveur') {
+                  window.location.href = '/nouvelle_commande';
+                } else {
+                  alert('Connexion réussie, mais redirection non définie pour ce rôle.');
+                  // Tu peux aussi rediriger ailleurs selon les rôles ici
+                }
+              } else {
+                alert('Veuillez remplir tous les champs.');
+              }
+            });
+          </script>
+
+    </div>
+</body>
+</html>

@@ -1,0 +1,41 @@
+<!-- Menu latéral -->
+<div id="side-menu"
+class="fixed top-0 left-0 h-full w-64 bg-black text-white transform -translate-x-full transition-transform duration-300 z-50">
+<div class="flex flex-col items-center pt-8">
+ <img src="/images/logoIda.png" alt="Logo" class="w-35 mb-6" />
+ 
+ <div class="mt-8 flex flex-col items-center">
+    <% if (utilisateur.role === 'serveur') { %>
+   <button class="bg-green-600 w-48 text-white font-semibold py-2 my-2 rounded-full">Servir une commande</button>
+   <button class="bg-blue-800 w-48 text-white font-semibold py-2 my-2 rounded-full">Nouvelle commande</button>
+
+   <% } else if (utilisateur.role === 'caissière') { %>
+    <button class="bg-purple-700 w-48 text-white font-semibold py-2 my-2 rounded-full">Encaisser</button>
+    <button class="bg-blue-600 w-48 text-white font-semibold py-2 my-2 rounded-full">Historique paiements</button>
+  <% } %>
+  <!-- Bouton déconnexion (toujours là) -->
+   <button class="bg-ida-gold w-48 text-white font-semibold py-2 my-2 rounded-full">Déconnexion</button>
+ </div>
+</div>
+<!-- Bouton de fermeture -->
+<div class="absolute bottom-6 left-1/2 transform -translate-x-1/2">
+<button id="menu-close" class="bg-ida-gold w-10 h-10 rounded-full flex items-center justify-center text-black">
+ <i class="fas fa-times text-xl"></i>
+</button>
+</div>
+</div>
+
+<!-- Script ouverture/fermeture menu -->
+<script>
+const menu = document.getElementById("side-menu");
+const toggleBtn = document.getElementById("menu-toggle");
+const closeBtn = document.getElementById("menu-close");
+
+toggleBtn.addEventListener("click", () => {
+menu.classList.remove("-translate-x-full");
+});
+
+closeBtn.addEventListener("click", () => {
+menu.classList.add("-translate-x-full");
+});
+</script>

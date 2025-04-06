@@ -1,0 +1,12 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+/* Vos styles personnalisés ici */
+.custom-header {
+  @apply bg-blue-600 text-white px-6 py-4 shadow-md;
+}
+
+.main-content {
+  @apply container mx-auto px-4 py-8;
+}
