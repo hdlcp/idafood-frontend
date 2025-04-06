@@ -6,7 +6,10 @@ const app = express();
 
 // Définir le moteur de rendu pour les fichiers EJS
 app.set("view engine", "ejs");
-app.set("views", path.join(__dirname, "../src/views/pages"));
+app.set("views", [
+    path.join(__dirname, "../src/views/pages"),
+    path.join(__dirname, "../src/views")  // Ajouter le répertoire parent
+  ]);
 
 // Servir les fichiers statiques
 app.use(express.static(path.join(__dirname, "../public")));
