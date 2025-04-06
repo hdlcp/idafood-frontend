@@ -8,6 +8,7 @@ const app = express();
 app.set("view engine", "ejs");
 app.set("views", path.join(process.cwd(), "src/views/pages"));
 
+
 // Servir les fichiers statiques
 app.use(express.static(path.join(process.cwd(), "public"))); // Utiliser process.cwd()
 
@@ -21,19 +22,15 @@ app.get("/login", (req, res) => {
 });
 
 app.get("/nouvelle_commande", (req, res) => {
-  // Calculer les chemins absolus à transmettre à la vue
-  const headerPath = path.join(process.cwd(), 'src/views/components/header');
-  const menuPath = path.join(process.cwd(), 'src/views/components/menu');
-
-  res.render("serveur/nouvelle_commande", {
-    utilisateur: {
-      nom: "Paul BOAKE",
-      role: "serveur"
-    },
-    headerPath: headerPath,
-    menuPath: menuPath
-  });
-});
+    res.render("serveur/nouvelle_commande", {
+      utilisateur: {
+        nom: "Paul BOAKE",
+        role: "serveur"
+      },
+      headerPath: 'components/header', // Utilisation d'un chemin relatif
+      menuPath: 'components/menu'      // Utilisation d'un chemin relatif
+    });
+  });  
 
 // Exporter la fonction pour Vercel
 module.exports = app;
