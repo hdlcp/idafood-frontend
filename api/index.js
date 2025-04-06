@@ -6,11 +6,10 @@ const app = express();
 
 // Définir le moteur de rendu pour les fichiers EJS
 app.set("view engine", "ejs");
-app.set("views", path.join(process.cwd(), "src/views/pages"));
-
+app.set("views", path.join(__dirname, "../src/views/pages"));
 
 // Servir les fichiers statiques
-app.use(express.static(path.join(process.cwd(), "public"))); // Utiliser process.cwd()
+app.use(express.static(path.join(__dirname, "../public")));
 
 // Routes
 app.get("/", (req, res) => {
@@ -22,15 +21,13 @@ app.get("/login", (req, res) => {
 });
 
 app.get("/nouvelle_commande", (req, res) => {
-    res.render("serveur/nouvelle_commande", {
-      utilisateur: {
-        nom: "Paul BOAKE",
-        role: "serveur"
-      },
-      headerPath: 'components/header', // Utilisation d'un chemin relatif
-      menuPath: 'components/menu'      // Utilisation d'un chemin relatif
-    });
-  });  
+  res.render("serveur/nouvelle_commande", {
+    utilisateur: {
+      nom: "Paul BOAKE",
+      role: "serveur"
+    }
+  });
+});
 
 // Exporter la fonction pour Vercel
 module.exports = app;
