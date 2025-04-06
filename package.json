@@ -7,7 +7,8 @@
     "start": "node src/js/app.js",
     "build:css": "tailwindcss -i ./src/css/input.css -o ./public/css/output.css",
     "watch:css": "tailwindcss -i ./src/css/input.css -o ./public/css/output.css --watch",
-    "dev": "nodemon src/js/app.js & npm run watch:css"
+    "dev": "nodemon src/js/app.js & npm run watch:css",
+    "build": "npm install"
   },
   "dependencies": {
     "ejs": "^3.1.10",
