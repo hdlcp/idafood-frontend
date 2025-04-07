@@ -1,0 +1,171 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script src="https://kit.fontawesome.com/yourkit.js" crossorigin="anonymous"></script> <!-- remplace par ta propre clé FontAwesome -->
+  <title>Commandes en attente</title>
+</head>
+<body class="bg-gray-100">
+    <style>
+        @keyframes slideOut {
+  0% {
+    opacity: 1;
+    transform: translateY(0);
+  }
+  100% {
+    opacity: 0;
+    transform: translateY(20px);
+  }
+}
+
+.commande.slide-out {
+  animation: slideOut 0.4s ease forwards;
+}
+
+    </style>
+
+ <!-- Header -->
+ <header>
+    <%- include('../components/header') %>
+    <%- include('../components/menu') %>
+
+
+  </header>
+
+  <main id="liste-commandes" class="p-4 space-y-4">
+    <% const commandes = [
+    {
+        id: 1,
+        plats: [
+          { nom: "Salade mixte", prix: 3500, quantite: 1 },
+          { nom: "Poulet braisé", prix: 5000, quantite: 2 }
+        ],
+        commentaire: "table 1, couple marié avec enfant"
+      },
+      {
+        id: 2,
+        plats: [
+          { nom: "Pizza 4 fromages", prix: 7000, quantite: 1 }
+        ],
+        commentaire: "table 2, étudiants en pause"
+      },
+      {
+        id: 3,
+        plats: [
+          { nom: "Pizza 4 fromages", prix: 7000, quantite: 1 }
+        ],
+        commentaire: "table 2, étudiants en pause"
+      },
+      {
+        id: 4,
+        plats: [
+          { nom: "Pizza 4 fromages", prix: 7000, quantite: 1 }
+        ],
+        commentaire: "table 2, étudiants en pause"
+      }
+    ]; %>
+
+    <% commandes.forEach(commande => { %>
+      <div class=" commande bg-white p-4 rounded-xl shadow space-y-2 relative" data-id="<%= commande.id %>">
+        <div class="flex justify-between items-center">
+          <div class="flex space-x-4">
+            <!-- Annuler -->
+            <button onclick="confirmerAction(<%= commande.id %>, 'annuler')" class="btn-annuler text-red-500 text-xl">
+                <i class="fas fa-times-circle"></i>
+            </button>
+            <!-- Valider -->
+            <button onclick="confirmerAction(<%= commande.id %>, 'valider')" class="btn-valider text-green-600 text-x">
+                <i class="fas fa-check-circle"></i>
+            </button>
+          </div>
+          <span class="text-xs font-semibold"><%= commande.commentaire %></span>
+        </div>
+
+        <!-- Liste des plats -->
+        <% commande.plats.forEach(plat => { %>
+          <div class="bg-indigo-100 rounded-lg px-3 py-1 flex items-center justify-between">
+            <div>
+              <p class="text-sm font-semibold"><%= plat.nom %></p>
+              <p class="text-xs text-gray-600"><%= plat.prix %> FCFA</p>
+            </div>
+            <div class="bg-gray-300 text-sm w-7 h-7 flex items-center justify-center rounded-full">
+              <%= plat.quantite %>
+            </div>
+          </div>
+        <% }); %>
+      </div>
+    <% }); %>
+  </main>
+  <!-- Message si plus aucune commande -->
+<p id="aucune-commande" class="text-center text-gray-500 mt-8 hidden">
+    Aucune commande créée.
+  </p>
+
+  <!-- Modal confirmation -->
+  <div id="modal" class="hidden fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+    <div class="bg-white p-6 rounded-xl shadow-md text-center space-y-4 w-72">
+      <p id="modal-text" class="text-sm font-semibold"></p>
+      <div class="flex justify-center space-x-4">
+        <button id="confirm-btn" class="bg-green-600 text-white px-4 py-1 rounded-full">Valider</button>
+        <button onclick="fermerModal()" class="bg-red-600 text-white px-4 py-1 rounded-full">Annuler</button>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    let commandeId = null;
+let actionEnCours = null;
+
+function confirmerAction(id, action) {
+  commandeId = id;
+  actionEnCours = action;
+
+  const texte = action === 'valider'
+    ? "Voulez-vous confirmer que cette commande a été servie ?"
+    : "Voulez-vous vraiment annuler cette commande ?";
+
+  document.getElementById("modal-text").textContent = texte;
+  document.getElementById("modal").classList.remove("hidden");
+}
+
+function fermerModal() {
+  document.getElementById("modal").classList.add("hidden");
+  commandeId = null;
+  actionEnCours = null;
+}
+
+document.getElementById("confirm-btn").addEventListener("click", () => {
+  if (commandeId !== null && actionEnCours) {
+    const payload = {
+      commandeId,
+      action: actionEnCours
+    };
+
+    console.log("Données prêtes à envoyer au backend :", payload);
+
+    const commandeElement = document.querySelector(`.commande[data-id="${commandeId}"]`);
+    if (commandeElement) {
+      commandeElement.classList.add("slide-out");
+
+      // Attendre la fin de l'animation avant de supprimer
+      commandeElement.addEventListener("animationend", () => {
+        commandeElement.remove();
+
+        // Vérifie s’il reste des commandes
+        const commandesRestantes = document.querySelectorAll(".commande");
+        if (commandesRestantes.length === 0) {
+          document.getElementById("aucune-commande").classList.remove("hidden");
+        }
+      });
+    }
+
+    fermerModal();
+  }
+});
+
+  </script>
+
+</body>
+</html>

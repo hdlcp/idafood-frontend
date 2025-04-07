@@ -32,6 +32,17 @@ app.get("/nouvelle_commande", (req, res) => {
   });
 });
 
+app.get("/commandes_attente", (req, res) => {
+  res.render("serveur/commandes_attente", {
+    utilisateur: {
+      nom: "Paul BOAKE",
+      role: "serveur"
+    },
+    commandes
+  });
+});
+
+
 // Exporter la fonction pour Vercel
 module.exports = app;
 module.exports.handler = serverless(app);
