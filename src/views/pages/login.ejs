@@ -96,6 +96,9 @@
               if (username && password && role) {
                 if (role === 'serveur') {
                   window.location.href = '/nouvelle_commande';
+                }
+                if (role === 'caissier') {
+                  window.location.href = '/ajout_depense';
                 } else {
                   alert('Connexion réussie, mais redirection non définie pour ce rôle.');
                   // Tu peux aussi rediriger ailleurs selon les rôles ici

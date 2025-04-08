@@ -49,7 +49,7 @@
   <footer class="bg-white p-4 rounded-t-xl shadow-md flex items-center justify-between">
     <p class="text-lg font-bold">Total : <span id="total">0</span> FCFA</p>
     <div class="flex items-center space-x-2">
-      <button 
+      <button
         id="submit-btn"
         class="bg-[#9B9BFF] text-white font-bold text-sm px-4 py-2 rounded-xl disabled:opacity-50"
         disabled
@@ -57,13 +57,9 @@
         Passer la commande
       </button>
       <div id="confirmation-message" class="mt-2 text-green-600 text-sm font-semibold"></div>
-      <button
-  onclick="toggleMenu()"
-  class="bg-ida-gold text-white font-extrabold text-2xl w-10 h-9 rounded-full flex items-center justify-center leading-none shadow-lg"
->
-  +
-</button>
-
+      <button onclick="toggleMenu()">
+        <i class="fa fa-plus-circle text-4xl text-ida-gold" aria-hidden="true"></i>
+      </button>
     </div>
   </footer>
 

@@ -32,13 +32,22 @@ app.get("/nouvelle_commande", (req, res) => {
   });
 });
 
+
 app.get("/commandes_attente", (req, res) => {
   res.render("serveur/commandes_attente", {
     utilisateur: {
       nom: "Paul BOAKE",
       role: "serveur"
-    },
-    commandes
+    }
+  });
+});
+
+app.get("/ajout_depense", (req, res) => {
+  res.render("caissiere/ajout_depense", {
+    utilisateur: {
+      nom: "Paul BOAKE",
+      role: "caissière"
+    }
   });
 });
 

@@ -1,0 +1,144 @@
+<!-- src/views/pages/ajout_depense.ejs -->
+<!DOCTYPE html>
+<html lang="fr">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://kit.fontawesome.com/your-kit-id.js" crossorigin="anonymous"></script>
+    <title>Dépense - IDA Food</title>
+  </head>
+
+  <body class="bg-[#f2f2f2] min-h-screen flex flex-col">
+    <!-- HEADER -->
+    <header>
+      <%- include('../components/header') %>
+      <%- include('../components/menu') %>
+    </header>
+
+    <!-- CONTENU PRINCIPAL -->
+
+    <main class="flex-1 p-4 flex flex-col justify-center items-center text-center">
+      <p id="empty-message" class="text-gray-500 mb-8 text-sm">Aucun article sélectionné</p>
+      <!-- Liste des dépenses ajoutées -->
+    <div id="depense-liste" class="w-full max-w-md space-y-2 mb-6"></div>
+
+    </main>
+
+    <!-- FOOTER -->
+    <footer class="bg-white p-4 rounded-t-xl shadow-md flex items-center justify-between">
+      <p class="text-lg font-bold">Total : <span id="total">0</span> FCFA</p>
+      <div class="flex items-center space-x-2">
+        <button id="open-depense-btn">
+          <i class="fa fa-plus-square text-4xl text-yellow-600" aria-hidden="true"></i>
+        </button>
+      </div>
+    </footer>
+
+    <!-- POPUP DÉPENSE -->
+    <div id="popup-depense" class="fixed bottom-0 left-0 w-full bg-white rounded-t-3xl shadow-lg p-5 z-50 transform translate-y-full transition-transform duration-300">
+      <div class="flex justify-between items-center mb-4">
+        <h2 class="text-lg font-bold">Ajouter une dépense</h2>
+        <button id="close-popup" class="text-black text-xl font-bold">&times;</button>
+      </div>
+      <form id="form-depense">
+        <input 
+          type="text" 
+          placeholder="Nom de la dépense" 
+          class="w-full p-2 mb-3 rounded-full bg-yellow-600/80 text-white placeholder-white"
+          required
+        >
+        <input 
+          type="number" 
+          placeholder="Prix de la dépense" 
+          class="w-full p-2 mb-3 rounded-full bg-yellow-600/80 text-white placeholder-white"
+          required
+        >
+        <input 
+          type="number" 
+          placeholder="Nombre de la dépense" 
+          class="w-full p-2 mb-3 rounded-full bg-yellow-600/80 text-white placeholder-white"
+          required
+        >
+        
+        <button 
+          type="submit" 
+          class="w-40 bg-yellow-600 text-white font-semibold py-2 rounded-full mx-auto flex justify-center mt-4"
+        >
+          Ajouter
+        </button>
+      </form>
+    </div>
+
+    <!-- SCRIPT -->
+    <script>
+      document.addEventListener("DOMContentLoaded", () => {
+        const popup = document.getElementById("popup-depense");
+        const openBtn = document.getElementById("open-depense-btn");
+        const closeBtn = document.getElementById("close-popup");
+        const form = document.getElementById("form-depense");
+        const depenseListe = document.getElementById("depense-liste");
+        const totalSpan = document.getElementById("total");
+        const emptyMessage = document.getElementById("empty-message");
+    
+        let total = 0;
+    
+        openBtn.addEventListener("click", () => {
+          console.log("OUVERTURE DU POPUP !");
+          popup.classList.remove("translate-y-full");
+        });
+    
+        closeBtn.addEventListener("click", () => {
+          popup.classList.add("translate-y-full");
+        });
+    
+        form.addEventListener("submit", (e) => {
+          e.preventDefault();
+    
+          const nom = form.elements[0].value;
+          const prix = parseInt(form.elements[1].value);
+          const nombre = parseInt(form.elements[2].value);
+    
+          if (!nom || isNaN(prix) || isNaN(nombre)) return;
+    
+          const montant = prix * nombre;
+          total += montant;
+    
+          // Créer la carte de dépense
+          const carte = document.createElement("div");
+          carte.className = "bg-white p-3 rounded-xl shadow flex justify-between items-center";
+    
+          carte.innerHTML = `
+            <div class="text-left">
+              <p class="font-bold">${nom}</p>
+              <p class="text-sm text-gray-600">${prix} FCFA</p>
+            </div>
+            <div class="flex items-center space-x-4">
+              <p class="font-bold">${nombre}</p>
+              <button class="text-red-500 font-bold text-xl btn-supprimer">&times;</button>
+            </div>
+          `;
+    
+          // Gestion de la suppression
+          carte.querySelector(".btn-supprimer").addEventListener("click", () => {
+            carte.remove();
+            total -= montant;
+            totalSpan.textContent = total;
+    
+            if (depenseListe.children.length === 0) {
+              emptyMessage.classList.remove("hidden");
+            }
+          });
+    
+          depenseListe.appendChild(carte);
+          totalSpan.textContent = total;
+    
+          emptyMessage.classList.add("hidden");
+    
+          form.reset();
+          popup.classList.add("translate-y-full");
+        });
+      });
+    </script>    
+  </body>
+</html>
