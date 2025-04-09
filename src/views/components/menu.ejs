@@ -10,9 +10,9 @@ class="fixed top-0 left-0 h-full w-64 bg-black text-white transform -translate-x
    <button onclick="window.location.href='/nouvelle_commande'" class="bg-blue-800 w-48 text-white font-semibold py-2 my-2 rounded-full">Nouvelle commande</button>
 
    <% } else if (utilisateur.role === 'caissière') { %>
-    <button class="bg-green-600 w-48 text-white font-semibold py-2 my-2 rounded-full">Finaliser une commande</button>
-    <button class="bg-blue-800 w-48 text-white font-semibold py-2 my-2 rounded-full">Ajouter une dépense</button>
-    <button class="bg-red-800 w-48 text-white font-semibold py-2 my-2 rounded-full">Point de la journée</button>
+    <button onclick="window.location.href='/finaliser_commande'" class="bg-green-600 w-48 text-white font-semibold py-2 my-2 rounded-full">Finaliser une commande</button>
+    <button onclick="window.location.href='/ajout_depense'" class="bg-blue-800 w-48 text-white font-semibold py-2 my-2 rounded-full">Ajouter une dépense</button>
+    <button onclick="window.location.href='/point_journee'" class="bg-red-800 w-48 text-white font-semibold py-2 my-2 rounded-full">Point de la journée</button>
   <% } %>
   <!-- Bouton déconnexion (toujours là) -->
    <button class="bg-ida-gold w-48 text-white font-semibold py-2 my-2 rounded-full">Déconnexion</button>

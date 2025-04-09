@@ -51,6 +51,26 @@ app.get("/ajout_depense", (req, res) => {
   });
 });
 
+app.get("/point_journee", (req, res) => {
+  res.render("caissiere/point_journee", {
+    utilisateur: {
+      nom: "Paul BOAKE",
+      role: "caissière"
+    }
+  });
+});
+
+
+app.get("/finaliser_commande", (req, res) => {
+  res.render("caissiere/finaliser_commande", {
+    utilisateur: {
+      nom: "Paul BOAKE",
+      role: "caissière"
+    }
+  });
+});
+
+
 
 // Exporter la fonction pour Vercel
 module.exports = app;

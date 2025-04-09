@@ -1,0 +1,133 @@
+<!DOCTYPE html>
+<html lang="fr">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://kit.fontawesome.com/your-kit-id.js" crossorigin="anonymous"></script>
+    <title>Finaliser_commande - IDA Food</title>
+  </head>
+
+  <body class="bg-[#f2f2f2] min-h-screen flex flex-col">
+    <!-- HEADER -->
+    <header>
+      <%- include('../components/header') %>
+      <%- include('../components/menu') %>
+    </header>
+
+    <% const commandes = [
+    {
+      id: 1,
+      serveur: 'Thomas BONO',
+      commentaire: 'table 1, couple marié avec enfant',
+      articles: [
+        { nom: 'Salade mixte', prix: 3500, quantite: 1 },
+        { nom: 'Brochette de bœuf', prix: 4000, quantite: 1 },
+        { nom: 'Jus de bissap', prix: 1000, quantite: 1 }
+      ],
+      total: 8500
+    },
+    {
+      id: 2,
+      serveur: 'Aline K',
+      commentaire: 'table 3, famille avec enfants',
+      articles: [
+        { nom: 'Poulet DG', prix: 5000, quantite: 1 },
+        { nom: 'Sodas', prix: 1500, quantite: 2 }
+      ],
+      total: 8000
+    },
+    {
+        id: 3,
+        serveur: 'Aline K',
+        commentaire: 'table 3, famille avec enfants',
+        articles: [
+          { nom: 'Poulet DG', prix: 5000, quantite: 1 },
+          { nom: 'Sodas', prix: 1500, quantite: 2 }
+        ],
+        total: 8000
+      },
+      {
+        id: 4,
+        serveur: 'Aline K',
+        commentaire: 'table 3, famille avec enfants',
+        articles: [
+          { nom: 'Poulet DG', prix: 5000, quantite: 1 },
+          { nom: 'Sodas', prix: 1500, quantite: 2 }
+        ],
+        total: 8000
+      }
+  ]; %>
+
+  <!-- Section Commandes en attente -->
+  <main class="p-4">
+    <section id="commandes-en-attente" class="space-y-4">
+      <% commandes.forEach(commande => { %>
+        <div class="commande bg-white p-4 rounded-xl shadow" data-id="<%= commande.id %>">
+          <p class="text-green-600 font-bold">✔</p>
+          <p class="text-sm text-right italic"><%= commande.commentaire %></p>
+          <p class="text-[#c3831e] font-bold">serveur : <%= commande.serveur %></p>
+          <div class="my-2">
+            <% commande.articles.forEach(article => { %>
+                  <div class=" px-3 py-1 flex items-center justify-between">
+                    <div>
+                      <p class="text-sm font-semibold"><%= article.nom %></p>
+                      <p class="text-xs text-gray-600"><%= article.prix %> FCFA</p>
+                    </div>
+                    <div class="bg-gray-300 text-sm w-7 h-7 flex items-center justify-center rounded-full">
+                      <%= article.quantite %>
+                    </div>
+                  </div>
+
+            <% }) %>
+          </div>
+          <div class="flex justify-between items-center mt-4">
+            <p class="text-lg font-bold text-[#c3831e]">Totale :</p>
+            <p class="text-lg font-bold"><%= commande.total %> FCFA</p>
+          </div>
+          <div class="flex space-x-2 mt-4">
+            <button onclick="payerCommande(this, 'momo')" class="btn-momo bg-green-600 text-white px-4 py-2 rounded-full font-bold">A payer en momo</button>
+            <button onclick="payerCommande(this, 'espece')" class="btn-espece bg-blue-900 text-white px-4 py-2 rounded-full font-bold">A payer en espèce</button>
+          </div>
+        </div>
+      <% }) %>
+    </section>
+
+    <!-- Section Commandes payées -->
+    <hr class="my-6 border-gray-400" />
+    <section id="commandes-payees" class="space-y-4"></section>
+  </main>
+
+  <!-- Script pour gérer le paiement -->
+  <script>
+    function payerCommande(button, mode) {
+      const commande = button.closest('.commande');
+      const id = commande.dataset.id;
+
+      // Simuler un appel backend (facultatif)
+      fetch(`/paiement/${id}`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ modePaiement: mode })
+      });
+
+      // Créer le nouveau bouton avec le mode de paiement choisi
+      const btnContainer = document.createElement("div");
+      const newBtn = document.createElement("button");
+      newBtn.textContent = mode === 'momo' ? "A payer en momo" : "A payer en espèce";
+      newBtn.className = `border-2 ${mode === 'momo' ? 'border-green-600 text-green-600' : 'border-blue-900 text-blue-900'} px-4 py-2 rounded-full font-bold`;
+      btnContainer.className = "mt-4";
+      btnContainer.appendChild(newBtn);
+
+      // Supprimer les anciens boutons
+      commande.querySelector('.flex.space-x-2')?.remove();
+
+      // Ajouter le nouveau bouton
+      commande.appendChild(btnContainer);
+
+      // Déplacer la commande dans la section "payées"
+      document.getElementById('commandes-payees').appendChild(commande);
+    }
+  </script>
+</body>
+</html>
