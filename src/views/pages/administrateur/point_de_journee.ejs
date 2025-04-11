@@ -1,0 +1,207 @@
+<!-- point_de_journee.ejs -->
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <script src="https://cdn.tailwindcss.com"></script>
+  <title>Point de la journée - IDA Food</title>
+</head>
+<body class="bg-[#f2f2f2] min-h-screen flex flex-col">
+
+  <!-- HEADER -->
+  <header>
+    <%- include('../components/header') %>
+    <%- include('../components/menu') %>
+  </header>
+
+  <% const pointjournee = {
+    totalCommandes: 350000,
+    totalMomo: 40500,
+    totalEspece: 60500,
+    totalDepenses: 35000,
+    totalCaisse: 340000,
+    commandes: [
+      {
+        serveur: 'Thomas BONO',
+        commentaire: 'table 1, couple marié avec enfant',
+        articles: [
+          { nom: 'Salade mixte', prix: 3500, quantite: 1 },
+          { nom: 'Salade mixte', prix: 3500, quantite: 1 },
+          { nom: 'Salade mixte', prix: 3500, quantite: 1 }
+        ],
+        total: 20000,
+        paiement: 'momo'
+      },
+      {
+        serveur: 'Thomas BONO',
+        commentaire: 'table 1, couple marié avec enfant',
+        articles: [
+          { nom: 'Salade mixte', prix: 3500, quantite: 3 }
+        ],
+        total: 20000,
+        paiement: 'espèce'
+      },
+      {
+        serveur: 'Thomas BONO',
+        commentaire: 'table 1, couple marié avec enfant',
+        articles: [
+          { nom: 'Salade mixte', prix: 3500, quantite: 3 }
+        ],
+        total: 20000,
+        paiement: 'espèce'
+      },
+      {
+        serveur: 'Thomas BONO',
+        commentaire: 'table 1, couple marié avec enfant',
+        articles: [
+          { nom: 'Salade mixte', prix: 3500, quantite: 3 }
+        ],
+        total: 20000,
+        paiement: 'espèce'
+      }
+    ],
+    depenses: [
+      { nom: 'Salade', prix: 3500, quantite: 1 },
+      { nom: 'Ognon', prix: 500, quantite: 7 },
+      { nom: 'Piment', prix: 500, quantite: 3 },
+      { nom: 'Viande', prix: 5000, quantite: 1 }
+    ]
+  }; %> 
+
+  <!-- CONTENU PRINCIPAL -->
+<main class="flex-grow px-4 py-6">
+  <!-- Vue initiale -->
+  <div id="vue-initiale" class="space-y-3">
+    <div class="bg-white p-4 rounded-xl shadow">
+      <p class="font-bold text-[#c3831e]">Totale commandes :</p>
+      <div class="flex items-center space-x-2 mt-1">
+        <p id="total-commandes" class="font-bold text-gray-800"><%= pointjournee.totalCommandes %> FCFA</p>
+        <button onclick="afficherCommandes()">
+          <i class="fas fa-eye text-green-600 ml-40"></i>
+        </button>
+      </div>
+    </div>
+
+    <div class="bg-white p-4 rounded-xl shadow">
+      <p class="font-bold text-[#c3831e]">Totale commande momo :</p>
+      <div class="flex items-center space-x-2 mt-1">
+        <p class="font-bold text-gray-800"><%= pointjournee.totalMomo %> FCFA</p>
+      </div>
+    </div>
+
+    <div class="bg-white p-4 rounded-xl shadow">
+      <p class="font-bold text-[#c3831e]">Totale commande espèce :</p>
+      <div class="flex items-center space-x-2 mt-1">
+        <p class="font-bold text-gray-800"><%= pointjournee.totalEspece %> FCFA</p>
+      </div>
+    </div>
+
+    <div class="bg-white p-4 rounded-xl shadow">
+      <p class="font-bold text-[#c3831e]">Totale dépenses :</p>
+      <div class="flex items-center space-x-2 mt-1">
+        <p class="font-bold text-gray-800"><%= pointjournee.totalDepenses %> FCFA</p>
+        <button onclick="afficherDepenses()">
+          <i class="fas fa-eye text-green-600 ml-40"></i>
+        </button>
+      </div>
+    </div>
+      <!-- Footer -->
+<footer>
+  <div class="bg-white p-4 rounded-t-xl shadow flex justify-between items-center">
+    <p class="font-bold text-[#c3831e]">Caisse :</p>
+    <p id="total-caisse" class="font-bold text-gray-800"><%= pointjournee.totalCaisse %> FCFA</p>
+  </div>
+</footer>
+  </div>
+
+
+ <!-- Vue commandes -->
+<div id="vue-commandes" class="hidden">
+  <button onclick="retourAccueil()" class="mb-4 text-[#c3831e] font-semibold hover:underline">&larr; Retour</button>
+  <% pointjournee.commandes.forEach(c => { %>
+    <div class="bg-white p-4 rounded-xl shadow mb-4">
+      <p class="text-green-600 font-bold">✔</p>
+      <p class="text-sm text-right italic"><%= c.commentaire %></p>
+      <p class="text-[#c3831e] font-bold">serveur : <%= c.serveur %></p>
+
+      <div class="my-2">
+        <% c.articles.forEach(article => { %>
+          <div class="px-3 py-1 flex items-center justify-between">
+            <div>
+              <p class="text-sm font-semibold"><%= article.nom %></p>
+              <p class="text-xs text-gray-600"><%= article.prix %> FCFA</p>
+            </div>
+            <div class="bg-gray-300 text-sm w-7 h-7 flex items-center justify-center rounded-full">
+              <%= article.quantite %>
+            </div>
+          </div>
+        <% }) %>
+      </div>
+
+      <div class="flex justify-between items-center mt-4">
+        <p class="text-lg font-bold text-[#c3831e]">Totale :</p>
+        <p class="text-lg font-bold"><%= c.total %> FCFA</p>
+      </div>
+
+      <div class="flex space-x-2 mt-4">
+        <% if (c.paiement === 'momo') { %>
+          <button class="bg-green-600 text-white px-4 py-2 rounded-full font-bold">A payer en momo</button>
+        <% } else { %>
+          <button class="bg-blue-900 text-white px-4 py-2 rounded-full font-bold">A payer en espèce</button>
+        <% } %>
+      </div>
+    </div>
+  <% }) %>
+</div>
+
+
+ <!-- Vue dépenses -->
+<div id="vue-depenses" class="hidden">
+  <button onclick="retourAccueil()" class="mb-4 text-[#c3831e] font-semibold hover:underline">&larr; Retour</button>
+  <div class="space-y-2 bg-gray-100 p-4 rounded-xl">
+    <% pointjournee.depenses.forEach(d => { %>
+      <div class="bg-white px-4 py-2 rounded-xl shadow flex justify-between items-center">
+        <div>
+          <p class="text-sm font-semibold"><%= d.nom %></p>
+          <p class="text-xs text-gray-600"><%= d.prix %> FCFA</p>
+        </div>
+        <div class="bg-gray-300 text-sm w-7 h-7 flex items-center justify-center rounded-full font-bold">
+          <%= d.quantite %>
+        </div>
+      </div>
+    <% }) %>
+
+    <!-- Total général -->
+    <div class="mt-6 border-t pt-2 border-gray-300 flex justify-between text-black font-bold text-lg">
+      <span>Total :</span>
+      <span>
+        <%= pointjournee.depenses.reduce((acc, d) => acc + d.prix * d.quantite, 0) %> FCFA
+      </span>
+    </div>
+  </div>
+</div>
+</main>
+
+
+
+<!-- JS -->
+<script>
+  function afficherCommandes() {
+    document.getElementById('vue-initiale').classList.add('hidden');
+    document.getElementById('vue-commandes').classList.remove('hidden');
+  }
+
+  function afficherDepenses() {
+    document.getElementById('vue-initiale').classList.add('hidden');
+    document.getElementById('vue-depenses').classList.remove('hidden');
+  }
+
+  function retourAccueil() {
+    document.getElementById('vue-initiale').classList.remove('hidden');
+    document.getElementById('vue-commandes').classList.add('hidden');
+    document.getElementById('vue-depenses').classList.add('hidden');
+  }
+</script>
+</body>
+</html>

@@ -1,0 +1,123 @@
+<!DOCTYPE html>
+<html lang="fr">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <script src="https://cdn.tailwindcss.com"></script>
+    <title>Gestion des employés - IDA Food</title>
+  </head>
+
+  <body class="bg-[#f2f2f2] min-h-screen flex flex-col">
+    <header>
+      <%- include('../components/header') %>
+      <%- include('../components/menu') %>
+    </header>
+
+    <% const employes = [
+  { id: 1, nom: "Jean KOUP", motdepasse: "1234", role: "serveur" },
+  { id: 2, nom: "Anne OKO", motdepasse: "1234", role: "caissière" },
+  { id: 3, nom: "Anne OKO", motdepasse: "1234", role: "cuisinière" }
+]; %>
+
+
+    <main class="flex-1 p-4 pb-20">
+      <div id="employe-liste" class="space-y-2">
+        <% employes.forEach(emp => { %>
+          <div id="employe-<%= emp.id %>" class="bg-white p-4 rounded-xl shadow flex justify-between items-center">
+            <div>
+              <p class="font-bold"><%= emp.nom %></p>
+              <p class="text-sm text-gray-600"><%= emp.role %></p>
+            </div>
+            <div class="flex space-x-4">
+                <button onclick="modifierEmploye(<%= emp.id %>)">
+                <svg class="w-5 h-5 text-yellow-600" fill="currentColor" viewBox="0 0 20 20"><path d="M17.414 2.586a2 2 0 00-2.828 0L7 10.172V13h2.828l7.586-7.586a2 2 0 000-2.828z"></path><path fill-rule="evenodd" d="M2 15a1 1 0 011-1h12a1 1 0 110 2H3a1 1 0 01-1-1z" clip-rule="evenodd"></path></svg>
+              </button>
+              <button onclick="supprimerEmploye('<%= emp.id %>')">
+                <svg class="w-5 h-5 text-red-600" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M6 2a1 1 0 011-1h6a1 1 0 011 1v1h3a1 1 0 110 2h-1v12a2 2 0 01-2 2H6a2 2 0 01-2-2V5H3a1 1 0 110-2h3V2zm2 3a1 1 0 00-1 1v10a1 1 0 102 0V6a1 1 0 00-1-1zm4 0a1 1 0 00-1 1v10a1 1 0 102 0V6a1 1 0 00-1-1z" clip-rule="evenodd"></path></svg>
+              </button>
+            </div>
+          </div>
+        <% }) %>
+      </div>
+
+      <div class="fixed bottom-4 left-0 right-0 flex justify-center">
+        <button onclick="ouvrirFormulaire()" class="bg-[#c3831e] text-white w-16 h-16 rounded-xl shadow text-2xl font-bold">+</button>
+      </div>
+
+      <!-- Popup formulaire -->
+      <div id="popup" class="fixed bottom-0 left-0 right-0 bg-white rounded-t-xl p-4 shadow transform translate-y-full transition-transform duration-300 z-50">
+        <div class="flex justify-between items-center mb-4">
+          <p class="font-bold text-lg">Employés</p>
+          <button onclick="fermerFormulaire()">&times;</button>
+        </div>
+        <form id="form-employe" onsubmit="soumettreEmploye(event)">
+          <input type="hidden" id="employe-id" />
+          <input id="nom" type="text" placeholder="Nom de l'employé" class="w-full mb-2 p-2 rounded-xl bg-[#c3831e] text-white placeholder-white" required />
+          <input id="motdepasse" type="password" placeholder="Mot de passe de l'employé" class="w-full mb-2 p-2 rounded-xl bg-[#c3831e] text-white placeholder-white" required />
+          <select id="role" class="w-full mb-4 p-2 rounded-xl bg-[#c3831e] text-white" required>
+            <option value="" disabled selected>Sélectionnez un rôle</option>
+            <option value="serveur">Serveur</option>
+            <option value="caissière">Caissière</option>
+            <option value="cuisinière">Cuisinière</option>
+            <option value="admin">Administrateur</option>
+          </select>
+          <button type="submit" class="bg-[#c3831e] w-40 text-white font-semibold py-2 rounded-full mx-auto flex justify-center mt-4">Ajouter</button>
+        </form>
+      </div>
+    </main>
+
+    <script>
+      function ouvrirFormulaire(modif = false) {
+  const popup = document.getElementById('popup');
+  popup.classList.remove('translate-y-full');
+
+  if (!modif) {
+    document.getElementById('form-employe').reset();
+    document.getElementById('employe-id').value = '';
+  }
+}
+      function fermerFormulaire() {
+        document.getElementById('popup').classList.add('translate-y-full');
+      }
+
+      function modifierEmploye(id) {
+  const employes = <%- JSON.stringify(employes) %>;
+  const emp = employes.find(e => e.id === id);
+
+  if (!emp) {
+    alert("Employé non trouvé !");
+    return;
+  }
+
+  document.getElementById('employe-id').value = emp.id;
+  document.getElementById('nom').value = emp.nom;
+  document.getElementById('motdepasse').value = emp.motdepasse || '';
+  document.getElementById('role').value = emp.role;
+
+  ouvrirFormulaire();
+}
+
+
+      function supprimerEmploye(id) {
+  if (confirm('Voulez-vous vraiment supprimer cet employé ?')) {
+    const bloc = document.getElementById('employe-' + id);
+    if (bloc) bloc.remove();
+  }
+}
+
+      function soumettreEmploye(e) {
+        e.preventDefault();
+        const id = document.getElementById('employe-id').value;
+        const nom = document.getElementById('nom').value;
+        const motdepasse = document.getElementById('motdepasse').value;
+        const role = document.getElementById('role').value;
+        if (id) {
+          alert('Modification employé: ' + nom + ' - ' + role);
+        } else {
+          alert('Ajout employé: ' + nom + ' - ' + role);
+        }
+        fermerFormulaire();
+      }
+    </script>
+  </body>
+</html>

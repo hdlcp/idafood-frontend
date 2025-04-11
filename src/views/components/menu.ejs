@@ -13,9 +13,14 @@ class="fixed top-0 left-0 h-full w-64 bg-black text-white transform -translate-x
     <button onclick="window.location.href='/finaliser_commande'" class="bg-green-600 w-48 text-white font-semibold py-2 my-2 rounded-full">Finaliser une commande</button>
     <button onclick="window.location.href='/ajout_depense'" class="bg-blue-800 w-48 text-white font-semibold py-2 my-2 rounded-full">Ajouter une dépense</button>
     <button onclick="window.location.href='/point_journee'" class="bg-red-800 w-48 text-white font-semibold py-2 my-2 rounded-full">Point de la journée</button>
-  <% } %>
+
+    <% } else if (utilisateur.role === 'administrateur') { %>
+    <button onclick="window.location.href='/employes'" class="bg-green-600 w-48 text-white font-semibold py-2 my-2 rounded-full">Employés</button>
+    <button onclick="window.location.href='/point_de_journee'" class="bg-blue-800 w-48 text-white font-semibold py-2 my-2 rounded-full">Points de la journée</button>
+    <button onclick="window.location.href='/point_general'" class="bg-red-800 w-48 text-white font-semibold py-2 my-2 rounded-full">Points Générale</button>
+    <% } %>
   <!-- Bouton déconnexion (toujours là) -->
-   <button class="bg-ida-gold w-48 text-white font-semibold py-2 my-2 rounded-full">Déconnexion</button>
+   <button onclick="window.location.href='/login'" class="bg-ida-gold w-48 text-white font-semibold py-2 my-2 rounded-full">Déconnexion</button>
  </div>
 </div>
 <!-- Bouton de fermeture -->

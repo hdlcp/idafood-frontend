@@ -23,6 +23,9 @@ app.get("/login", (req, res) => {
   res.render("login");
 });
 
+
+
+// Serveur
 app.get("/nouvelle_commande", (req, res) => {
   res.render("serveur/nouvelle_commande", {
     utilisateur: {
@@ -31,8 +34,6 @@ app.get("/nouvelle_commande", (req, res) => {
     }
   });
 });
-
-
 app.get("/commandes_attente", (req, res) => {
   res.render("serveur/commandes_attente", {
     utilisateur: {
@@ -42,6 +43,9 @@ app.get("/commandes_attente", (req, res) => {
   });
 });
 
+
+
+// Caissière
 app.get("/ajout_depense", (req, res) => {
   res.render("caissiere/ajout_depense", {
     utilisateur: {
@@ -50,7 +54,6 @@ app.get("/ajout_depense", (req, res) => {
     }
   });
 });
-
 app.get("/point_journee", (req, res) => {
   res.render("caissiere/point_journee", {
     utilisateur: {
@@ -59,14 +62,97 @@ app.get("/point_journee", (req, res) => {
     }
   });
 });
-
-
 app.get("/finaliser_commande", (req, res) => {
   res.render("caissiere/finaliser_commande", {
     utilisateur: {
       nom: "Paul BOAKE",
       role: "caissière"
     }
+  });
+});
+
+
+// Administrateur
+app.get("/employes", (req, res) => {
+  res.render("administrateur/employes", {
+    utilisateur: {
+      nom: "Ida food",
+      role: "administrateur"
+    }
+  });
+});
+app.get("/point_de_journee", (req, res) => {
+  res.render("administrateur/point_de_journee", {
+    utilisateur: {
+      nom: "Ida food",
+      role: "administrateur"
+    }
+  });
+});
+app.get("/point_general", (req, res) => {
+  res.render("administrateur/point_general", {
+    utilisateur: {
+      nom: "Ida food",
+      role: "administrateur"
+    }
+  });
+});
+
+ //cuisinière
+ app.get("/commande_totale", (req, res) => {
+  res.render("cuisiniere/commande_totale", {
+    utilisateur: {
+      nom: "Justine OKO",
+      role: "cuisinière"
+    },
+    commandes: [
+      {
+        serveur: "Thomas BONO",
+        articles: [
+          { nom: "Salade mixte", prix: 3500 },
+          { nom: "Salade mixte", prix: 3500 },
+          { nom: "Salade mixte", prix: 3500 }
+        ],
+        total: 20000,
+        commentaire: "table 1, couple marié avec enfant, pas trop de sel"
+      },
+      {
+        serveur: "Thomas BONO",
+        articles: [
+          { nom: "Salade mixte", prix: 3500 },
+          { nom: "Salade mixte", prix: 3500 },
+          { nom: "Salade mixte", prix: 3500 },
+          { nom: "Salade mixte", prix: 3500 },
+          { nom: "Salade mixte", prix: 3500 }
+        ],
+        total: 20000,
+        commentaire: "table 1, couple marié avec enfant, pas trop de sel"
+      },
+      {
+        serveur: "Thomas BONO",
+        articles: [
+          { nom: "Salade mixte", prix: 3500 },
+          { nom: "Salade mixte", prix: 3500 },
+          { nom: "Salade mixte", prix: 3500 },
+          { nom: "Salade mixte", prix: 3500 },
+          { nom: "Salade mixte", prix: 3500 }
+        ],
+        total: 20000,
+        commentaire: "table 1, couple marié avec enfant, pas trop de sel"
+      },
+      {
+        serveur: "Thomas BONO",
+        articles: [
+          { nom: "Salade mixte", prix: 3500 },
+          { nom: "Salade mixte", prix: 3500 },
+          { nom: "Salade mixte", prix: 3500 },
+          { nom: "Salade mixte", prix: 3500 },
+          { nom: "Salade mixte", prix: 3500 }
+        ],
+        total: 20000,
+        commentaire: "table 1, couple marié avec enfant, pas trop de sel"
+      }
+    ]
   });
 });
 

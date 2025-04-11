@@ -1,0 +1,132 @@
+<!-- point_de_journee.ejs -->
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <script src="https://cdn.tailwindcss.com"></script>
+  <title>Point de la journée - IDA Food</title>
+</head>
+<body class="bg-[#f2f2f2] min-h-screen flex flex-col">
+
+  <!-- HEADER -->
+  <header>
+    <%- include('../components/header') %>
+    <%- include('../components/menu') %>
+  </header>
+
+  <main class="flex-grow p-4 space-y-6">
+    <!-- Formulaire de filtre -->
+    <form id="filtre-form" class="bg-white p-4 rounded-xl shadow space-y-4">
+      <div>
+        <label class="block font-semibold mb-1 text-[#c3831e]">Filtrer par :</label>
+        <select id="filtre" class="w-full p-2 border rounded">
+          <option value="jour">Un jour</option>
+          <option value="mois">Un mois</option>
+          <option value="periode">Période personnalisée</option>
+        </select>
+      </div>
+
+      <div id="champ-jour" class="hidden">
+        <label class="block mb-1 text-sm">Jour :</label>
+        <input type="date" id="jour" class="w-full p-2 border rounded" />
+      </div>
+
+      <div id="champ-mois" class="hidden">
+        <label class="block mb-1 text-sm">Mois :</label>
+        <input type="month" id="mois" class="w-full p-2 border rounded" />
+      </div>
+
+      <div id="champ-periode" class="hidden">
+        <label class="block mb-1 text-sm">Du :</label>
+        <input type="date" id="debut" class="w-full p-2 border rounded mb-2" />
+        <label class="block mb-1 text-sm">Au :</label>
+        <input type="date" id="fin" class="w-full p-2 border rounded" />
+      </div>
+
+      <button type="submit" class="mt-4 w-full bg-[#c3831e] text-white font-bold py-2 rounded hover:bg-yellow-700">
+        Afficher le point
+      </button>
+    </form>
+
+    <!-- Résultats -->
+    <div id="resultat" class="bg-white p-4 rounded-xl shadow hidden space-y-4">
+      <h2 id="periode-titre" class="text-xl font-bold text-[#c3831e]"></h2>
+      <div class="text-gray-800 space-y-1">
+        <p><span class="font-bold">Commandes :</span> <span id="total-commandes"></span> FCFA</p>
+        <p><span class="font-bold">Momo :</span> <span id="total-momo"></span> FCFA</p>
+        <p><span class="font-bold">Espèces :</span> <span id="total-espece"></span> FCFA</p>
+        <p><span class="font-bold">Dépenses :</span> <span id="total-depenses"></span> FCFA</p>
+        <p class="font-bold text-lg text-green-700">Caisse finale : <span id="total-caisse"></span> FCFA</p>
+      </div>
+    </div>
+  </main>
+
+  <script>
+    // Affichage dynamique des champs
+    const filtreSelect = document.getElementById('filtre');
+    const champJour = document.getElementById('champ-jour');
+    const champMois = document.getElementById('champ-mois');
+    const champPeriode = document.getElementById('champ-periode');
+
+    filtreSelect.addEventListener('change', () => {
+      champJour.classList.add('hidden');
+      champMois.classList.add('hidden');
+      champPeriode.classList.add('hidden');
+
+      if (filtreSelect.value === 'jour') champJour.classList.remove('hidden');
+      if (filtreSelect.value === 'mois') champMois.classList.remove('hidden');
+      if (filtreSelect.value === 'periode') champPeriode.classList.remove('hidden');
+    });
+
+    // Données simulées
+    const dataSimulee = {
+      jour: {
+        totalCommandes: 80000,
+        totalMomo: 50000,
+        totalEspece: 30000,
+        totalDepenses: 20000
+      },
+      mois: {
+        totalCommandes: 550000,
+        totalMomo: 300000,
+        totalEspece: 250000,
+        totalDepenses: 120000
+      },
+      periode: {
+        totalCommandes: 230000,
+        totalMomo: 120000,
+        totalEspece: 110000,
+        totalDepenses: 70000
+      }
+    };
+
+    // Traitement du formulaire
+    document.getElementById('filtre-form').addEventListener('submit', (e) => {
+      e.preventDefault();
+      const filtre = filtreSelect.value;
+      const resultat = dataSimulee[filtre];
+
+      if (resultat) {
+        document.getElementById('periode-titre').textContent =
+          filtre === 'jour' ? `Point du ${document.getElementById('jour').value}` :
+          filtre === 'mois' ? `Point du mois ${document.getElementById('mois').value}` :
+          `Point du ${document.getElementById('debut').value} au ${document.getElementById('fin').value}`;
+
+        document.getElementById('total-commandes').textContent = resultat.totalCommandes;
+        document.getElementById('total-momo').textContent = resultat.totalMomo;
+        document.getElementById('total-espece').textContent = resultat.totalEspece;
+        document.getElementById('total-depenses').textContent = resultat.totalDepenses;
+        document.getElementById('total-caisse').textContent =
+          resultat.totalMomo + resultat.totalEspece - resultat.totalDepenses;
+
+        document.getElementById('resultat').classList.remove('hidden');
+      }
+    });
+
+    // Initialisation : afficher champ "jour" par défaut
+    filtreSelect.dispatchEvent(new Event('change'));
+  </script>
+
+</body>
+</html>

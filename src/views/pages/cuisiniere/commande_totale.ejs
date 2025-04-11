@@ -1,0 +1,89 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <script src="https://cdn.tailwindcss.com"></script>
+  <title>Point de la journée - IDA Food</title>
+
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+      font-family: 'Inter', sans-serif;
+    }
+    .card {
+      background: white;
+      padding: 1rem;
+      border-radius: 10px;
+      box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+    }
+    .card h4 {
+      color: #b87a1f;
+      margin-bottom: 0.5rem;
+      font-size: 0.95rem;
+    }
+    .item {
+      display: flex;
+      justify-content: space-between;
+      font-size: 0.9rem;
+    }
+    .total {
+      text-align: right;
+      font-weight: bold;
+      margin: 0.5rem 0;
+    }
+    .footer {
+      font-size: 0.8rem;
+      color: gray;
+      margin-top: 0.5rem;
+    }
+    .validate-icon {
+      color: green;
+      font-size: 1.2rem;
+    }
+    .refresh-btn {
+      position: fixed;
+      bottom: 1rem;
+      right: 1rem;
+      background: #b87a1f;
+      border: none;
+      border-radius: 8px;
+      padding: 0.6rem 1rem;
+      color: white;
+      font-size: 1.2rem;
+      cursor: pointer;
+    }
+  </style>
+</head>
+<body class="bg-[#f2f2f2] min-h-screen flex flex-col">
+
+<!-- Header -->
+<header>
+    <%- include('../components/header') %>
+  </header>
+
+  <!-- DYNAMIQUE : Affichage des commandes -->
+  <div class="grid grid-cols-1 md:grid-cols-2 gap-4 p-4">
+    <% commandes.forEach(cmd => { %>
+      <div class="card">
+        <h4>serveur : <%= cmd.serveur %></h4>
+        <% cmd.articles.forEach(article => { %>
+          <div class="item">
+            <div><%= article.nom %></div>
+            <div><%= article.prix %> FCFA</div>
+          </div>
+        <% }) %>
+        <div class="total">Totale : <%= cmd.total %> FCFA</div>
+        <div class="validate-icon">✔️</div>
+        <div class="footer"><%= cmd.commentaire %></div>
+      </div>
+    <% }) %>
+  </div>
+
+  <!-- Bouton de rafraîchissement -->
+  <button class="refresh-btn" onclick="location.reload()">⟳</button>
+
+</body>
+</html>
