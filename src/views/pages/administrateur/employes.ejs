@@ -13,31 +13,42 @@
       <%- include('../components/menu') %>
     </header>
 
-    <% const employes = [
-  { id: 1, nom: "Jean KOUP", motdepasse: "1234", role: "serveur" },
-  { id: 2, nom: "Anne OKO", motdepasse: "1234", role: "caissière" },
-  { id: 3, nom: "Anne OKO", motdepasse: "1234", role: "cuisinière" }
-]; %>
-
-
     <main class="flex-1 p-4 pb-20">
-      <div id="employe-liste" class="space-y-2">
-        <% employes.forEach(emp => { %>
-          <div id="employe-<%= emp.id %>" class="bg-white p-4 rounded-xl shadow flex justify-between items-center">
-            <div>
-              <p class="font-bold"><%= emp.nom %></p>
-              <p class="text-sm text-gray-600"><%= emp.role %></p>
-            </div>
-            <div class="flex space-x-4">
-                <button onclick="modifierEmploye(<%= emp.id %>)">
-                <svg class="w-5 h-5 text-yellow-600" fill="currentColor" viewBox="0 0 20 20"><path d="M17.414 2.586a2 2 0 00-2.828 0L7 10.172V13h2.828l7.586-7.586a2 2 0 000-2.828z"></path><path fill-rule="evenodd" d="M2 15a1 1 0 011-1h12a1 1 0 110 2H3a1 1 0 01-1-1z" clip-rule="evenodd"></path></svg>
-              </button>
-              <button onclick="supprimerEmploye('<%= emp.id %>')">
-                <svg class="w-5 h-5 text-red-600" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M6 2a1 1 0 011-1h6a1 1 0 011 1v1h3a1 1 0 110 2h-1v12a2 2 0 01-2 2H6a2 2 0 01-2-2V5H3a1 1 0 110-2h3V2zm2 3a1 1 0 00-1 1v10a1 1 0 102 0V6a1 1 0 00-1-1zm4 0a1 1 0 00-1 1v10a1 1 0 102 0V6a1 1 0 00-1-1z" clip-rule="evenodd"></path></svg>
-              </button>
-            </div>
+      <!-- Indicateur de chargement -->
+      <div id="loading" class="bg-white p-4 rounded-xl shadow text-center mb-4 hidden">
+        <p class="text-gray-700">Chargement en cours...</p>
+      </div>
+
+      <!-- Messages d'alerte -->
+      <div id="alert" class="bg-green-100 border-l-4 border-green-500 text-green-700 p-4 rounded shadow-sm mb-4 hidden">
+        <div class="flex items-center">
+          <div class="py-1">
+            <svg class="h-6 w-6 text-green-500 mr-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path>
+            </svg>
           </div>
-        <% }) %>
+          <div>
+            <p id="alert-message" class="font-bold"></p>
+          </div>
+        </div>
+      </div>
+
+      <!-- Message d'erreur -->
+      <div id="error-alert" class="bg-red-100 border-l-4 border-red-500 text-red-700 p-4 rounded shadow-sm mb-4 hidden">
+        <div class="flex items-center">
+          <div class="py-1">
+            <svg class="h-6 w-6 text-red-500 mr-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
+            </svg>
+          </div>
+          <div>
+            <p id="error-message" class="font-bold"></p>
+          </div>
+        </div>
+      </div>
+
+      <div id="employe-liste" class="space-y-2">
+        <!-- Les employés seront chargés ici dynamiquement -->
       </div>
 
       <div class="fixed bottom-4 left-0 right-0 flex justify-center">
@@ -47,8 +58,8 @@
       <!-- Popup formulaire -->
       <div id="popup" class="fixed bottom-0 left-0 right-0 bg-white rounded-t-xl p-4 shadow transform translate-y-full transition-transform duration-300 z-50">
         <div class="flex justify-between items-center mb-4">
-          <p class="font-bold text-lg">Employés</p>
-          <button onclick="fermerFormulaire()">&times;</button>
+          <p class="font-bold text-lg" id="form-title">Ajouter un employé</p>
+          <button onclick="fermerFormulaire()" class="text-2xl">&times;</button>
         </div>
         <form id="form-employe" onsubmit="soumettreEmploye(event)">
           <input type="hidden" id="employe-id" />
@@ -57,66 +68,258 @@
           <select id="role" class="w-full mb-4 p-2 rounded-xl bg-[#c3831e] text-white" required>
             <option value="" disabled selected>Sélectionnez un rôle</option>
             <option value="serveur">Serveur</option>
-            <option value="caissière">Caissière</option>
-            <option value="cuisinière">Cuisinière</option>
-            <option value="admin">Administrateur</option>
+            <option value="caissiere">Caissière</option>
+            <option value="cuisiniere">Cuisinière</option>
+            <option value="boss">Administrateur</option>
           </select>
-          <button type="submit" class="bg-[#c3831e] w-40 text-white font-semibold py-2 rounded-full mx-auto flex justify-center mt-4">Ajouter</button>
+          <button type="submit" id="form-submit-btn" class="bg-[#c3831e] w-40 text-white font-semibold py-2 rounded-full mx-auto flex justify-center mt-4">Ajouter</button>
         </form>
       </div>
     </main>
 
     <script>
-      function ouvrirFormulaire(modif = false) {
-  const popup = document.getElementById('popup');
-  popup.classList.remove('translate-y-full');
+      // Configuration API
+      const API_URL = "https://idafoodback.onrender.com/api/user";
+      
+      // Au chargement de la page
+      document.addEventListener('DOMContentLoaded', function() {
+        chargerEmployes();
+      });
 
-  if (!modif) {
-    document.getElementById('form-employe').reset();
-    document.getElementById('employe-id').value = '';
-  }
-}
+      // Fonctions de gestion des alertes
+      function showAlert(message, isError = false) {
+        const alertElement = isError ? document.getElementById('error-alert') : document.getElementById('alert');
+        const messageElement = isError ? document.getElementById('error-message') : document.getElementById('alert-message');
+        
+        messageElement.textContent = message;
+        alertElement.classList.remove('hidden');
+        
+        // Cacher l'alerte après 5 secondes
+        setTimeout(() => {
+          alertElement.classList.add('hidden');
+        }, 5000);
+      }
+
+      function showLoading(visible) {
+        const loadingElement = document.getElementById('loading');
+        if (visible) {
+          loadingElement.classList.remove('hidden');
+        } else {
+          loadingElement.classList.add('hidden');
+        }
+      }
+
+      // Charger la liste des employés
+      async function chargerEmployes() {
+        showLoading(true);
+        try {
+          const token = '<%= token || (utilisateur && utilisateur.token) || "" %>';
+          
+          const response = await fetch(`${API_URL}/list_user`, {
+            method: 'GET',
+            headers: {
+              'Authorization': `Bearer ${token}`,
+              'Content-Type': 'application/json'
+            }
+          });
+          
+          const result = await response.json();
+          
+          if (result.success) {
+            afficherEmployes(result.data);
+          } else {
+            showAlert(result.message || 'Erreur lors du chargement des employés', true);
+          }
+        } catch (error) {
+          console.error('Erreur:', error);
+          showAlert('Erreur de connexion au serveur', true);
+        } finally {
+          showLoading(false);
+        }
+      }
+
+      // Afficher les employés dans la liste
+      function afficherEmployes(employes) {
+        const liste = document.getElementById('employe-liste');
+        liste.innerHTML = '';
+        
+        if (employes.length === 0) {
+          liste.innerHTML = '<div class="bg-white p-4 rounded-xl shadow text-center"><p>Aucun employé trouvé</p></div>';
+          return;
+        }
+        
+        employes.forEach(emp => {
+          const element = document.createElement('div');
+          element.id = `employe-${emp.id}`;
+          element.className = 'bg-white p-4 rounded-xl shadow flex justify-between items-center';
+          element.innerHTML = `
+            <div>
+              <p class="font-bold">${emp.nom}</p>
+              <p class="text-sm text-gray-600">${emp.role}</p>
+            </div>
+            <div class="flex space-x-4">
+              <button onclick="modifierEmploye(${emp.id})">
+                <svg class="w-5 h-5 text-yellow-600" fill="currentColor" viewBox="0 0 20 20"><path d="M17.414 2.586a2 2 0 00-2.828 0L7 10.172V13h2.828l7.586-7.586a2 2 0 000-2.828z"></path><path fill-rule="evenodd" d="M2 15a1 1 0 011-1h12a1 1 0 110 2H3a1 1 0 01-1-1z" clip-rule="evenodd"></path></svg>
+              </button>
+              <button onclick="supprimerEmploye(${emp.id})">
+                <svg class="w-5 h-5 text-red-600" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M6 2a1 1 0 011-1h6a1 1 0 011 1v1h3a1 1 0 110 2h-1v12a2 2 0 01-2 2H6a2 2 0 01-2-2V5H3a1 1 0 110-2h3V2zm2 3a1 1 0 00-1 1v10a1 1 0 102 0V6a1 1 0 00-1-1zm4 0a1 1 0 00-1 1v10a1 1 0 102 0V6a1 1 0 00-1-1z" clip-rule="evenodd"></path></svg>
+              </button>
+            </div>
+          `;
+          liste.appendChild(element);
+        });
+      }
+
+      // Ouvrir le formulaire
+      function ouvrirFormulaire(modif = false) {
+        const popup = document.getElementById('popup');
+        popup.classList.remove('translate-y-full');
+
+        if (!modif) {
+          document.getElementById('form-employe').reset();
+          document.getElementById('employe-id').value = '';
+          document.getElementById('form-title').textContent = 'Ajouter un employé';
+          document.getElementById('form-submit-btn').textContent = 'Ajouter';
+        } else {
+          document.getElementById('form-title').textContent = 'Modifier un employé';
+          document.getElementById('form-submit-btn').textContent = 'Modifier';
+        }
+      }
+
+      // Fermer le formulaire
       function fermerFormulaire() {
         document.getElementById('popup').classList.add('translate-y-full');
       }
 
-      function modifierEmploye(id) {
-  const employes = <%- JSON.stringify(employes) %>;
-  const emp = employes.find(e => e.id === id);
+      // Modifier un employé
+      async function modifierEmploye(id) {
+        showLoading(true);
+        try {
+          const token = '<%= token || (utilisateur && utilisateur.token) || "" %>';
+          
+          // On récupère d'abord les données complètes de l'employé
+          const response = await fetch(`${API_URL}/list_user`, {
+            method: 'GET',
+            headers: {
+              'Authorization': `Bearer ${token}`,
+              'Content-Type': 'application/json'
+            }
+          });
+          
+          const result = await response.json();
+          
+          if (result.success) {
+            const emp = result.data.find(e => e.id === id);
+            
+            if (!emp) {
+              showAlert("Employé non trouvé !", true);
+              return;
+            }
+            
+            document.getElementById('employe-id').value = emp.id;
+            document.getElementById('nom').value = emp.nom;
+            document.getElementById('motdepasse').value = '';  // Pour des raisons de sécurité, ne pas pré-remplir
+            document.getElementById('role').value = emp.role;
+            
+            ouvrirFormulaire(true);
+          } else {
+            showAlert(result.message || 'Erreur lors de la récupération des données', true);
+          }
+        } catch (error) {
+          console.error('Erreur:', error);
+          showAlert('Erreur de connexion au serveur', true);
+        } finally {
+          showLoading(false);
+        }
+      }
 
-  if (!emp) {
-    alert("Employé non trouvé !");
-    return;
-  }
+      // Supprimer un employé
+      async function supprimerEmploye(id) {
+        if (confirm('Voulez-vous vraiment supprimer cet employé ?')) {
+          showLoading(true);
+          try {
+            const token = '<%= token || (utilisateur && utilisateur.token) || "" %>';
+            
+            const response = await fetch(`${API_URL}/delete_user/${id}`, {
+              method: 'DELETE',
+              headers: {
+                'Authorization': `Bearer ${token}`,
+                'Content-Type': 'application/json'
+              }
+            });
+            
+            const result = await response.json();
+            
+            if (result.success) {
+              const bloc = document.getElementById('employe-' + id);
+              if (bloc) bloc.remove();
+              showAlert('Employé supprimé avec succès');
+            } else {
+              showAlert(result.message || 'Erreur lors de la suppression', true);
+            }
+          } catch (error) {
+            console.error('Erreur:', error);
+            showAlert('Erreur de connexion au serveur', true);
+          } finally {
+            showLoading(false);
+          }
+        }
+      }
 
-  document.getElementById('employe-id').value = emp.id;
-  document.getElementById('nom').value = emp.nom;
-  document.getElementById('motdepasse').value = emp.motdepasse || '';
-  document.getElementById('role').value = emp.role;
-
-  ouvrirFormulaire();
-}
-
-
-      function supprimerEmploye(id) {
-  if (confirm('Voulez-vous vraiment supprimer cet employé ?')) {
-    const bloc = document.getElementById('employe-' + id);
-    if (bloc) bloc.remove();
-  }
-}
-
-      function soumettreEmploye(e) {
+      // Soumettre le formulaire (création ou modification)
+      async function soumettreEmploye(e) {
         e.preventDefault();
+        showLoading(true);
+        
         const id = document.getElementById('employe-id').value;
         const nom = document.getElementById('nom').value;
-        const motdepasse = document.getElementById('motdepasse').value;
+        const password = document.getElementById('motdepasse').value;
         const role = document.getElementById('role').value;
-        if (id) {
-          alert('Modification employé: ' + nom + ' - ' + role);
-        } else {
-          alert('Ajout employé: ' + nom + ' - ' + role);
+        
+        const token = '<%= token || (utilisateur && utilisateur.token) || "" %>';
+        
+        try {
+          let url, method;
+          
+          // Données à envoyer (différentes selon création ou mise à jour)
+          const data = id ? 
+            { nom, ...(password ? { password } : {}) } : // Pour la mise à jour, envoi du mot de passe seulement s'il est rempli
+            { nom, password, role }; // Pour la création, tous les champs
+          
+          if (id) {
+            // Mise à jour
+            url = `${API_URL}/update_user/${id}`;
+            method = 'PUT';
+          } else {
+            // Création
+            url = `${API_URL}/signup`;
+            method = 'POST';
+          }
+          
+          const response = await fetch(url, {
+            method: method,
+            headers: {
+              'Content-Type': 'application/json',
+              ...(id ? { 'Authorization': `Bearer ${token}` } : {}) // Token requis seulement pour mise à jour
+            },
+            body: JSON.stringify(data)
+          });
+          
+          const result = await response.json();
+          
+          if (result.success) {
+            showAlert(id ? 'Employé modifié avec succès' : 'Employé ajouté avec succès');
+            fermerFormulaire();
+            chargerEmployes(); // Recharger la liste des employés
+          } else {
+            showAlert(result.message || 'Erreur lors de l\'opération', true);
+          }
+        } catch (error) {
+          console.error('Erreur:', error);
+          showAlert('Erreur de connexion au serveur', true);
+        } finally {
+          showLoading(false);
         }
-        fermerFormulaire();
       }
     </script>
   </body>

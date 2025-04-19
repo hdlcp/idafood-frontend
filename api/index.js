@@ -173,7 +173,8 @@ app.get("/logout", (req, res) => {
 // Routes protégées - Administrateur
 app.get("/employes", requireLogin, (req, res) => {
   res.render("administrateur/employes", {
-    utilisateur: req.session.user
+    utilisateur: req.session.user,
+    token: req.session.token  // Ajoutez cette ligne pour passer le token
   });
 });
 
