@@ -344,6 +344,159 @@ app.get("/commandes_attente", requireLogin, (req, res) => {
   });
 });
 
+// Proxy pour vérifier si une page de journée est active
+app.get("/api/page-journee-active-proxy", requireLogin, async (req, res) => {
+  try {
+    const response = await axios.get(`${API_URL}/api/page_journee/active`, {
+      headers: {
+        Authorization: `Bearer ${req.session.token}`
+      }
+    });
+    
+    res.json(response.data);
+  } catch (error) {
+    console.error("Erreur de vérification de page active:", error.response?.data || error.message);
+    res.status(error.response?.status || 500).json({
+      success: false,
+      message: error.response?.data?.message || "Erreur de connexion au serveur"
+    });
+  }
+});
+
+// Proxy pour ouvrir une page de journée
+app.post("/api/page-journee-open-proxy", requireLogin, async (req, res) => {
+  try {
+    const response = await axios.post(`${API_URL}/api/page_journee/open`, {}, {
+      headers: {
+        Authorization: `Bearer ${req.session.token}`
+      }
+    });
+    
+    res.json(response.data);
+  } catch (error) {
+    console.error("Erreur d'ouverture de page journée:", error.response?.data || error.message);
+    res.status(error.response?.status || 500).json({
+      success: false,
+      message: error.response?.data?.message || "Erreur de connexion au serveur"
+    });
+  }
+});
+
+// Proxy pour fermer une page de journée
+app.put("/api/page-journee-close-proxy", requireLogin, async (req, res) => {
+  try {
+    const response = await axios.put(`${API_URL}/api/page_journee/close`, {}, {
+      headers: {
+        Authorization: `Bearer ${req.session.token}`
+      }
+    });
+    
+    res.json(response.data);
+  } catch (error) {
+    console.error("Erreur de fermeture de page journée:", error.response?.data || error.message);
+    res.status(error.response?.status || 500).json({
+      success: false,
+      message: error.response?.data?.message || "Erreur de connexion au serveur"
+    });
+  }
+});
+
+// Proxy pour obtenir les statistiques des commandes
+app.get("/api/order-stats-proxy", requireLogin, async (req, res) => {
+  try {
+    const response = await axios.get(`${API_URL}/api/order/stats`, {
+      headers: {
+        Authorization: `Bearer ${req.session.token}`
+      }
+    });
+    
+    res.json(response.data);
+  } catch (error) {
+    console.error("Erreur de récupération des stats de commande:", error.response?.data || error.message);
+    res.status(error.response?.status || 500).json({
+      success: false,
+      message: error.response?.data?.message || "Erreur de connexion au serveur"
+    });
+  }
+});
+
+// Proxy pour obtenir les statistiques des achats
+app.get("/api/purchase-stats-proxy", requireLogin, async (req, res) => {
+  try {
+    const response = await axios.get(`${API_URL}/api/purchase/stats`, {
+      headers: {
+        Authorization: `Bearer ${req.session.token}`
+      }
+    });
+    
+    res.json(response.data);
+  } catch (error) {
+    console.error("Erreur de récupération des stats d'achats:", error.response?.data || error.message);
+    res.status(error.response?.status || 500).json({
+      success: false,
+      message: error.response?.data?.message || "Erreur de connexion au serveur"
+    });
+  }
+});
+
+// Proxy pour lister les dépenses
+app.get("/api/purchase-list-proxy", requireLogin, async (req, res) => {
+  try {
+    const response = await axios.get(`${API_URL}/api/purchase`, {
+      headers: {
+        Authorization: `Bearer ${req.session.token}`
+      }
+    });
+    
+    res.json(response.data);
+  } catch (error) {
+    console.error("Erreur de récupération des dépenses:", error.response?.data || error.message);
+    res.status(error.response?.status || 500).json({
+      success: false,
+      message: error.response?.data?.message || "Erreur de connexion au serveur"
+    });
+  }
+});
+
+// Proxy pour créer une dépense
+app.post("/api/purchase-create-proxy", requireLogin, async (req, res) => {
+  try {
+    const response = await axios.post(`${API_URL}/api/purchase`, req.body, {
+      headers: {
+        Authorization: `Bearer ${req.session.token}`
+      }
+    });
+    
+    res.json(response.data);
+  } catch (error) {
+    console.error("Erreur de création de dépense:", error.response?.data || error.message);
+    res.status(error.response?.status || 500).json({
+      success: false,
+      message: error.response?.data?.message || "Erreur de connexion au serveur"
+    });
+  }
+});
+
+// Proxy pour supprimer une dépense
+app.delete("/api/purchase-delete-proxy/:id", requireLogin, async (req, res) => {
+  try {
+    const purchaseId = req.params.id;
+    const response = await axios.delete(`${API_URL}/api/purchase/${purchaseId}`, {
+      headers: {
+        Authorization: `Bearer ${req.session.token}`
+      }
+    });
+    
+    res.json(response.data);
+  } catch (error) {
+    console.error("Erreur de suppression de dépense:", error.response?.data || error.message);
+    res.status(error.response?.status || 500).json({
+      success: false,
+      message: error.response?.data?.message || "Erreur de connexion au serveur"
+    });
+  }
+});
+
 // Routes protégées - Cuisinière
 app.get("/commande_totale", requireLogin, (req, res) => {
   res.render("cuisiniere/commande_totale", {

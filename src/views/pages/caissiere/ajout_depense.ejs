@@ -5,7 +5,7 @@
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <script src="https://cdn.tailwindcss.com"></script>
-    <script src="https://kit.fontawesome.com/your-kit-id.js" crossorigin="anonymous"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <title>Dépense - IDA Food</title>
   </head>
 
@@ -80,65 +80,167 @@
         const depenseListe = document.getElementById("depense-liste");
         const totalSpan = document.getElementById("total");
         const emptyMessage = document.getElementById("empty-message");
-    
+      
         let total = 0;
-    
+        let depenses = [];
+      
+        // Créer un toast pour les notifications
+        function showToast(message, isError = false) {
+          // Supprimer les toasts existants
+          const oldToasts = document.querySelectorAll('.toast');
+          oldToasts.forEach(toast => toast.remove());
+          
+          // Créer le nouveau toast
+          const toast = document.createElement('div');
+          toast.className = `fixed top-20 left-1/2 transform -translate-x-1/2 z-50 px-4 py-2 rounded-lg shadow-lg ${isError ? 'bg-red-500' : 'bg-green-500'} text-white`;
+          toast.textContent = message;
+          document.body.appendChild(toast);
+          
+          // Supprimer après 3 secondes
+          setTimeout(() => {
+            toast.remove();
+          }, 3000);
+        }
+      
+        // Charger les dépenses existantes
+        async function chargerDepenses() {
+          try {
+            const response = await fetch('/api/purchase-list-proxy');
+            const data = await response.json();
+            
+            if (data.success || Array.isArray(data.data)) { // Modifié pour accepter même si success est false
+              // Réinitialiser les données
+              depenses = data.data;
+              total = 0;
+              depenseListe.innerHTML = '';
+              
+              // Afficher les dépenses
+              if (depenses.length > 0) {
+                emptyMessage.classList.add("hidden");
+                depenses.forEach(depense => {
+                  ajouterCarteDependse(depense);
+                  total += depense.total;
+                });
+                totalSpan.textContent = total;
+              } else {
+                emptyMessage.classList.remove("hidden");
+                totalSpan.textContent = 0;
+              }
+            } else {
+              showToast(data.message || "Erreur lors du chargement des dépenses", true);
+            }
+          } catch (error) {
+            console.error('Erreur:', error);
+            showToast("Erreur de connexion au serveur", true);
+          }
+        }
+      
+        // Ajouter une carte de dépense à l'interface
+        function ajouterCarteDependse(depense) {
+          const carte = document.createElement("div");
+          carte.className = "bg-white p-3 rounded-xl shadow flex justify-between items-center";
+          carte.dataset.id = depense.id;
+      
+          carte.innerHTML = `
+            <div class="text-left">
+              <p class="font-bold">${depense.nom_produit}</p>
+              <p class="text-sm text-gray-600">${depense.prix_unitaire} FCFA</p>
+            </div>
+            <div class="flex items-center space-x-4">
+              <p class="font-bold">${depense.quantite}</p>
+              <button class="text-red-500 font-bold text-xl btn-supprimer">&times;</button>
+            </div>
+          `;
+      
+          // Gestion de la suppression
+          carte.querySelector(".btn-supprimer").addEventListener("click", async () => {
+            try {
+              const response = await fetch(`/api/purchase-delete-proxy/${depense.id}`, {
+                method: 'DELETE'
+              });
+              const data = await response.json();
+              
+              if (data.success) {
+                // Au lieu de supprimer seulement un élément, on recharge toute la liste
+                chargerDepenses();
+                showToast("Dépense supprimée avec succès");
+              } else {
+                showToast(data.message || "Erreur lors de la suppression", true);
+              }
+            } catch (error) {
+              console.error('Erreur:', error);
+              showToast("Erreur de connexion au serveur", true);
+            }
+          });
+      
+          depenseListe.appendChild(carte);
+        }
+      
+        // Ouvrir le popup
         openBtn.addEventListener("click", () => {
           console.log("OUVERTURE DU POPUP !");
           popup.classList.remove("translate-y-full");
         });
-    
+      
+        // Fermer le popup
         closeBtn.addEventListener("click", () => {
           popup.classList.add("translate-y-full");
         });
-    
-        form.addEventListener("submit", (e) => {
+      
+        // Soumettre le formulaire
+        form.addEventListener("submit", async (e) => {
           e.preventDefault();
-    
-          const nom = form.elements[0].value;
-          const prix = parseInt(form.elements[1].value);
-          const nombre = parseInt(form.elements[2].value);
-    
-          if (!nom || isNaN(prix) || isNaN(nombre)) return;
-    
-          const montant = prix * nombre;
-          total += montant;
-    
-          // Créer la carte de dépense
-          const carte = document.createElement("div");
-          carte.className = "bg-white p-3 rounded-xl shadow flex justify-between items-center";
-    
-          carte.innerHTML = `
-            <div class="text-left">
-              <p class="font-bold">${nom}</p>
-              <p class="text-sm text-gray-600">${prix} FCFA</p>
-            </div>
-            <div class="flex items-center space-x-4">
-              <p class="font-bold">${nombre}</p>
-              <button class="text-red-500 font-bold text-xl btn-supprimer">&times;</button>
-            </div>
-          `;
-    
-          // Gestion de la suppression
-          carte.querySelector(".btn-supprimer").addEventListener("click", () => {
-            carte.remove();
-            total -= montant;
-            totalSpan.textContent = total;
-    
-            if (depenseListe.children.length === 0) {
-              emptyMessage.classList.remove("hidden");
+      
+          const nomProduit = form.elements[0].value;
+          const prixUnitaire = parseInt(form.elements[1].value);
+          const quantite = parseInt(form.elements[2].value);
+      
+          if (!nomProduit || isNaN(prixUnitaire) || isNaN(quantite)) {
+            showToast("Veuillez remplir tous les champs correctement", true);
+            return;
+          }
+      
+          // Préparer les données pour l'API
+          const depenseData = {
+            nom_produit: nomProduit,
+            prix_unitaire: prixUnitaire,
+            quantite: quantite
+          };
+      
+          try {
+            const response = await fetch('/api/purchase-create-proxy', {
+              method: 'POST',
+              headers: {
+                'Content-Type': 'application/json'
+              },
+              body: JSON.stringify(depenseData)
+            });
+            
+            const data = await response.json();
+            
+            if (data.success) {
+              // Au lieu d'ajouter manuellement la nouvelle dépense à l'UI,
+              // on recharge toutes les dépenses pour s'assurer d'avoir les données à jour
+              chargerDepenses();
+              
+              // Réinitialiser le formulaire et fermer le popup
+              form.reset();
+              popup.classList.add("translate-y-full");
+              
+              showToast("Dépense ajoutée avec succès");
+            } else {
+              showToast(data.message || "Erreur lors de l'ajout de la dépense", true);
             }
-          });
-    
-          depenseListe.appendChild(carte);
-          totalSpan.textContent = total;
-    
-          emptyMessage.classList.add("hidden");
-    
-          form.reset();
-          popup.classList.add("translate-y-full");
+          } catch (error) {
+            console.error('Erreur:', error);
+            showToast("Erreur de connexion au serveur", true);
+          }
         });
+      
+        // Charger les dépenses au chargement de la page
+        chargerDepenses();
       });
-    </script>    
+    </script>
+    <script src="/js/auth-checker.js"></script>  
   </body>
 </html>

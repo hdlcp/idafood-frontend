@@ -51,45 +51,151 @@
    
 
     <script>
-      const commandes = [
-        { total: 15000, modePaiement: 'momo' },
-        { total: 20000, modePaiement: 'espece' },
-        { total: 10000, modePaiement: 'momo' },
-        { total: 25000, modePaiement: 'espece' },
-      ];
-
-      const depenses = [
-        { montant: 5000 },
-        { montant: 3000 },
-        { montant: 2000 },
-      ];
-
       let journeeOuverte = false;
-
-      function ouvrirJournee() {
-        if (journeeOuverte) {
-          location.reload(); // ou cacher les infos si tu veux
-          return;
-        }
-
-        const totalCommandes = commandes.reduce((sum, c) => sum + c.total, 0);
-        const totalMomo = commandes.filter(c => c.modePaiement === 'momo').reduce((sum, c) => sum + c.total, 0);
-        const totalEspece = commandes.filter(c => c.modePaiement === 'espece').reduce((sum, c) => sum + c.total, 0);
-        const totalDepenses = depenses.reduce((sum, d) => sum + d.montant, 0);
-        const caisse = totalCommandes - totalDepenses;
-
-        document.getElementById('total-commandes').textContent = totalCommandes + ' FCFA';
-        document.getElementById('total-momo').textContent = totalMomo + ' FCFA';
-        document.getElementById('total-espece').textContent = totalEspece + ' FCFA';
-        document.getElementById('total-depenses').textContent = totalDepenses + ' FCFA';
-        document.getElementById('total-caisse').textContent = caisse + ' FCFA';
-
-        const btn = document.getElementById('btn-journal');
-        btn.textContent = 'Fermer la page de la journée';
-        btn.classList.remove('bg-[#080077]');
-        btn.classList.add('bg-green-600');
-        journeeOuverte = true;
+      
+      // Fonction pour formater les montants
+      function formatMontant(montant) {
+        return montant.toLocaleString('fr-FR') + ' FCFA';
       }
+      
+      // Fonction pour afficher l'état de chargement sur le bouton
+      function afficherChargement(isLoading) {
+        const btn = document.getElementById('btn-journal');
+        
+        if (isLoading) {
+          btn.disabled = true;
+          btn.innerHTML = '<span class="inline-block animate-spin mr-2">⟳</span> Traitement en cours...';
+        } else {
+          btn.disabled = false;
+          mettreAJourBouton(); // Rétablir le bouton à son état normal
+        }
+      }
+      
+      // Vérifier si une page de journée est déjà active au chargement
+      async function verifierPageActive() {
+        try {
+          afficherChargement(true);
+          const response = await fetch('/api/page-journee-active-proxy');
+          const data = await response.json();
+          
+          // Vérifier si une page est active en utilisant la structure de réponse correcte
+          if (data.success && data.data && data.data.is_open === true) {
+            journeeOuverte = true;
+            await chargerDonnees();
+          } else {
+            journeeOuverte = false;
+          }
+        } catch (error) {
+          console.error('Erreur lors de la vérification de la page active:', error);
+          journeeOuverte = false;
+        } finally {
+          afficherChargement(false);
+        }
+      }
+      
+      // Charger les données des commandes et achats
+      async function chargerDonnees() {
+        try {
+          // Récupérer les stats des commandes
+          const responseCommandes = await fetch('/api/order-stats-proxy');
+          const dataCommandes = await responseCommandes.json();
+          
+          // Récupérer les stats des achats
+          const responseAchats = await fetch('/api/purchase-stats-proxy');
+          const dataAchats = await responseAchats.json();
+          
+          if (dataCommandes.success) {
+            const statsCommandes = dataCommandes.data;
+            document.getElementById('total-commandes').textContent = formatMontant(statsCommandes.total_paye);
+            document.getElementById('total-momo').textContent = formatMontant(statsCommandes.total_momo);
+            document.getElementById('total-espece').textContent = formatMontant(statsCommandes.total_especes);
+          }
+          
+          if (responseAchats.success) {
+            const totalDepenses = dataAchats.data.total_achats;
+            document.getElementById('total-depenses').textContent = formatMontant(totalDepenses);
+            
+            // Calculer la caisse
+            const totalCommandes = dataCommandes.success ? dataCommandes.data.total_paye : 0;
+            const caisse = totalCommandes - totalDepenses;
+            document.getElementById('total-caisse').textContent = formatMontant(caisse);
+          }
+        } catch (error) {
+          console.error('Erreur lors du chargement des données:', error);
+        }
+      }
+      
+      // Mettre à jour l'apparence du bouton selon l'état
+      function mettreAJourBouton() {
+        const btn = document.getElementById('btn-journal');
+        
+        if (journeeOuverte) {
+          btn.textContent = 'Fermer la page de la journée';
+          btn.classList.remove('bg-[#080077]');
+          btn.classList.add('bg-green-600');
+        } else {
+          btn.textContent = 'Ouvrir la page de la journée';
+          btn.classList.remove('bg-green-600');
+          btn.classList.add('bg-[#080077]');
+        }
+      }
+      
+      // Fonction pour ouvrir ou fermer la journée
+      async function ouvrirJournee() {
+        try {
+          afficherChargement(true);
+          
+          if (journeeOuverte) {
+            // Fermer la page de journée
+            const response = await fetch('/api/page-journee-close-proxy', {
+              method: 'PUT',
+              headers: {
+                'Content-Type': 'application/json'
+              }
+            });
+            
+            const data = await response.json();
+            
+            if (data.success) {
+              journeeOuverte = false;
+              // Réinitialiser les valeurs affichées
+              document.getElementById('total-commandes').textContent = '0 FCFA';
+              document.getElementById('total-momo').textContent = '0 FCFA';
+              document.getElementById('total-espece').textContent = '0 FCFA';
+              document.getElementById('total-depenses').textContent = '0 FCFA';
+              document.getElementById('total-caisse').textContent = '0 FCFA';
+            } else {
+              alert('Erreur lors de la fermeture de la page: ' + data.message);
+            }
+          } else {
+            // Ouvrir la page de journée
+            const response = await fetch('/api/page-journee-open-proxy', {
+              method: 'POST',
+              headers: {
+                'Content-Type': 'application/json'
+              }
+            });
+            
+            const data = await response.json();
+            
+            if (data.success) {
+              journeeOuverte = true;
+              await chargerDonnees();
+            } else {
+              alert('Erreur lors de l\'ouverture de la page: ' + data.message);
+            }
+          }
+        } catch (error) {
+          console.error('Erreur:', error);
+          alert('Une erreur est survenue. Veuillez réessayer.');
+        } finally {
+          afficherChargement(false);
+        }
+      }
+      
+      // Vérifier l'état de la page au chargement
+      document.addEventListener('DOMContentLoaded', verifierPageActive);
     </script>
+    <script src="/js/auth-checker.js"></script>
   </body>
 </html>
