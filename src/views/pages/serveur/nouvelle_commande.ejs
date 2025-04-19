@@ -1,4 +1,3 @@
-<!-- src/views/pages/nouvelle_commande.ejs -->
 <!DOCTYPE html>
 <html lang="fr">
   <head>
@@ -18,22 +17,18 @@
     </style>
 
   </head>
-  <body class="bg-[#f2f2f2] min-h-screen flex flex-col"></body>
+  <body class="bg-[#f2f2f2] min-h-screen flex flex-col">
         <!-- Header -->
         <header>
           <%- include('../components/header') %>
           <%- include('../components/menu') %>
-
-
         </header>
        
-
-
    <!-- CONTENU PRINCIPAL -->
    <main class="flex-1 p-4 flex flex-col justify-center items-center text-center">
     <p id="empty-message" class="text-gray-500 mb-8 text-sm">Aucun article sélectionné</p>
 
-     <!-- 🟡 ICI : Zone d’affichage des articles ajoutés -->
+     <!-- 🟡 ICI : Zone d'affichage des articles ajoutés -->
   <div id="commande" class="w-full max-w-md space-y-2 mb-6"></div>
 
     <!-- Input motif -->
@@ -63,262 +58,346 @@
     </div>
   </footer>
 
+  <!-- MENU FLOTTANT -->
+  <div id="menu-flottant" class="fixed bottom-0 left-0 w-full max-h-[70%] bg-white shadow-xl rounded-t-2xl transform translate-y-full transition-transform duration-300 z-50">
+    <div class="flex items-center justify-between p-4 border-b">
+      <h2 class="text-lg font-semibold">Menu</h2>
+      <button onclick="toggleMenu()" class="text-gray-600 text-xl">
+        <i class="fas fa-times"></i>
+      </button>
+    </div>
+
+    <!-- Barre de recherche -->
+    <div class="px-4 py-2">
+      <input id="recherche" type="text" placeholder="Rechercher..." class="w-full p-2 rounded-md border text-sm focus:outline-none" />
+    </div>
+
+    <!-- Filtres -->
+    <div id="filters" class="flex px-4 py-2 space-x-2 text-sm font-semibold overflow-x-auto scrollbar-hide">
+      <button data-categorie="Petit Déjeuner" class="px-3 py-1 bg-[#F1C96F] text-white rounded-full whitespace-nowrap">Petit Déjeuner</button>
+      <button data-categorie="Desserts" class="px-3 py-1 bg-gray-200 rounded-full whitespace-nowrap">Desserts</button>
+      <button data-categorie="Jus Bio" class="px-3 py-1 bg-gray-200 rounded-full whitespace-nowrap">Jus Bio</button>
+      <button data-categorie="boissons" class="px-3 py-1 bg-gray-200 rounded-full whitespace-nowrap">Boissons</button>
+    </div>
+
+    <!-- Liste des plats -->
+    <div id="liste-plats" class="overflow-y-auto max-h-64 px-4 scrollbar-hide">
+      <!-- Plats générés dynamiquement ici -->
+    </div>
+  </div>
+
   <!-- SCRIPTS -->
   <script src="https://kit.fontawesome.com/83eaa4b7f0.js" crossorigin="anonymous"></script>
+  <script src="/js/auth-checker.js"></script>
+
   <script>
-    function toggleMenu() {
-      // Ici tu peux ouvrir le menu latéral ou afficher la liste des plats
-      alert("Ouvrir le menu !");
-    }
-  </script>
+    // Initialisation des produits comme un objet vide pour chaque catégorie
+    let produits = {
+      "Petit Déjeuner": [],
+      "Desserts": [],
+      "Jus Bio": [],
+      "boissons": []
+    };
 
+    let categorieActive = "Petit Déjeuner"; // catégorie par défaut
+    const panier = [];
 
-</body>
-<!-- MENU FLOTTANT -->
-<div id="menu-flottant" class="fixed bottom-0 left-0 w-full max-h-[70%] bg-white shadow-xl rounded-t-2xl transform translate-y-full transition-transform duration-300 z-50">
-  <div class="flex items-center justify-between p-4 border-b">
-    <h2 class="text-lg font-semibold">Menu</h2>
-    <button onclick="toggleMenu()" class="text-gray-600 text-xl">
-      <i class="fas fa-times"></i>
-    </button>
-  </div>
-
-  <!-- Barre de recherche -->
-  <div class="px-4 py-2">
-    <input id="recherche" type="text" placeholder="Rechercher..." class="w-full p-2 rounded-md border text-sm focus:outline-none" />
-  </div>
-
-  <!-- Filtres -->
-  <div id="filters" class="flex px-4 py-2 space-x-2 text-sm font-semibold">
-    <button data-categorie="entrees" class="px-3 py-1 bg-gray-200 rounded-full">Entrées</button>
-    <button data-categorie="plats" class="px-3 py-1 bg-[#F1C96F] text-white rounded-full">Plats</button>
-    <button data-categorie="desserts" class="px-3 py-1 bg-gray-200 rounded-full">Desserts</button>
-    <button data-categorie="boissons" class="px-3 py-1 bg-gray-200 rounded-full">Boissons</button>
-  </div>
-
-  <!-- Liste des plats -->
-  <div id="liste-plats" class="overflow-y-auto max-h-64 px-4 scrollbar-hide">
-    <!-- Plats générés dynamiquement ici -->
-  </div>
-</div>
-
-<script>
-  const produits = {
-    entrees: [
-      { nom: "Salade mixte", prix: 2500 },
-      { nom: "Avocat crevette", prix: 3000 },
-      { nom: "Salade mixte", prix: 2500 },
-      { nom: "Avocat crevette", prix: 3000 },
-    ],
-    plats: [
-      { nom: "Poulet DG", prix: 3500 },
-      { nom: "Poisson braisé", prix: 4000 },
-      { nom: "Poulet DG", prix: 3500 },
-      { nom: "Poisson braisé", prix: 4000 },
-    ],
-    desserts: [
-      { nom: "Glace vanille", prix: 1500 },
-      { nom: "Tarte aux pommes", prix: 1800 },
-      { nom: "Glace vanille", prix: 1500 },
-      { nom: "Tarte aux pommes", prix: 1800 },
-    ],
-    boissons: [
-      { nom: "Jus de bissap", prix: 1000 },
-      { nom: "Eau minérale", prix: 500 },
-       { nom: "Jus de bissap", prix: 1000 },
-      { nom: "Eau minérale", prix: 500 },
-    ],
-  };
-
-  let categorieActive = "plats"; // catégorie par défaut
-
-  function toggleMenu() {
-    const menu = document.getElementById("menu-flottant");
-    menu.classList.toggle("translate-y-full");
-    renderPlats(categorieActive);
-    highlightFilter(categorieActive);
-  }
-
-  function renderPlats(categorie) {
-    const container = document.getElementById("liste-plats");
-    const searchTerm = document.getElementById("recherche").value.toLowerCase();
-    const liste = produits[categorie].filter(p => p.nom.toLowerCase().includes(searchTerm));
-    container.innerHTML = "";
-
-    if (liste.length === 0) {
-      container.innerHTML = `<p class="text-gray-400 text-sm text-center py-4">Aucun plat trouvé</p>`;
-      return;
-    }
-
-    liste.forEach(produit => {
-      const platHTML = `
-        <div class="flex justify-between items-center bg-[#E7E5FD] rounded-xl px-4 py-3 mb-2">
-          <div>
-            <p class="font-semibold text-sm">${produit.nom}</p>
-            <p class="text-xs">${produit.prix} FCFA</p>
-          </div>
-         <button 
-  class="bg-[#c3831e] text-white text-lg w-8 h-8 rounded-full flex items-center justify-center add-plat-btn"
-  data-nom="${produit.nom}" 
-  data-prix="${produit.prix}"
->
-  <i class="fas fa-plus"></i>
-</button>
-
-        </div>
-      `;
-      container.insertAdjacentHTML("beforeend", platHTML);
-    });
-    // Ajouter les articles à la commande
-container.querySelectorAll('.add-plat-btn').forEach(btn => {
-  btn.addEventListener('click', () => {
-    const nom = btn.getAttribute('data-nom');
-    const prix = parseInt(btn.getAttribute('data-prix'));
-
-    ajouterArticle(nom, prix);
-  });
-});
-
-  }
-  const panier = [];
-
-  function ajouterArticle(nom, prix) {
-  // Vérifier si l'article existe déjà dans le panier
-  const existant = panier.find(item => item.nom === nom);
-  
-  if (existant) {
-    existant.quantite++;
-  } else {
-    panier.push({ nom, prix, quantite: 1 });
-  }
-
-  document.getElementById("empty-message").style.display = "none";
-  afficherCommande();
-  updateTotal();
-}
-
-
-function updateTotal() {
-  const total = panier.reduce((sum, item) => sum + item.prix * item.quantite, 0);
-  const btn = document.getElementById("submit-btn");
-
-  document.getElementById("total").innerText = total;
-
-  if (total === 0) {
-    btn.disabled = true;
-    btn.classList.remove("bg-[#070B7F]");
-    btn.classList.add("bg-[#9B9BFF]");
-  } else {
-    btn.disabled = false;
-    btn.classList.remove("bg-[#9B9BFF]");
-    btn.classList.add("bg-[#070B7F]");
-  }
-}
-
-
-  function highlightFilter(activeCat) {
-    document.querySelectorAll('#filters button').forEach(btn => {
-      const cat = btn.getAttribute('data-categorie');
-      if (cat === activeCat) {
-        btn.classList.add('bg-[#F1C96F]', 'text-white');
-        btn.classList.remove('bg-gray-200');
-      } else {
-        btn.classList.remove('bg-[#F1C96F]', 'text-white');
-        btn.classList.add('bg-gray-200');
+    // Fonction pour récupérer le menu depuis l'API
+    async function fetchMenu() {
+      try {
+        // Afficher un indicateur de chargement
+        document.getElementById("liste-plats").innerHTML = '<p class="text-center py-4">Chargement du menu...</p>';
+        
+        const response = await fetch('/api/menu-proxy');
+        if (!response.ok) {
+          throw new Error('Erreur lors de la récupération du menu');
+        }
+        
+        const data = await response.json();
+        
+        // Traiter les données du menu et les organiser par catégorie
+        if (data.success && data.data) {
+          // Réinitialiser les produits
+          produits = {
+            "Petit Déjeuner": [],
+            "Desserts": [],
+            "Jus Bio": [],
+            "boissons": []
+          };
+          
+          // Organiser les produits par catégorie
+          data.data.forEach(categorie => {
+            const nomCategorie = categorie.nom;
+            
+            // Vérifier si la catégorie existe dans notre objet produits
+            if (produits.hasOwnProperty(nomCategorie)) {
+              produits[nomCategorie] = categorie.composants.map(item => ({
+                nom: item.nom,
+                prix: item.prix,
+                id: item.id
+              }));
+            }
+          });
+          
+          // Afficher la catégorie active
+          renderPlats(categorieActive);
+          highlightFilter(categorieActive);
+        } else {
+          throw new Error(data.message || 'Erreur lors de la récupération du menu');
+        }
+      } catch (error) {
+        console.error('Erreur menu:', error);
+        document.getElementById("liste-plats").innerHTML = 
+          `<p class="text-red-500 text-center py-4">Impossible de charger le menu. ${error.message}</p>`;
       }
-    });
-  }
+    }
 
-  // Clic sur boutons de filtre
-  document.querySelectorAll('#filters button').forEach(btn => {
-    btn.addEventListener("click", () => {
-      const cat = btn.getAttribute("data-categorie");
-      categorieActive = cat;
+    function toggleMenu() {
+      const menu = document.getElementById("menu-flottant");
+      menu.classList.toggle("translate-y-full");
       renderPlats(categorieActive);
       highlightFilter(categorieActive);
+    }
+
+    function renderPlats(categorie) {
+      const container = document.getElementById("liste-plats");
+      const searchTerm = document.getElementById("recherche").value.toLowerCase();
+      
+      // Vérifier si la catégorie existe dans nos produits
+      if (!produits[categorie] || !Array.isArray(produits[categorie])) {
+        container.innerHTML = `<p class="text-gray-400 text-sm text-center py-4">Catégorie non disponible</p>`;
+        return;
+      }
+      
+      const liste = produits[categorie].filter(p => p.nom.toLowerCase().includes(searchTerm));
+      container.innerHTML = "";
+
+      if (liste.length === 0) {
+        container.innerHTML = `<p class="text-gray-400 text-sm text-center py-4">Aucun plat trouvé</p>`;
+        return;
+      }
+
+      liste.forEach(produit => {
+        const platHTML = `
+          <div class="flex justify-between items-center bg-[#E7E5FD] rounded-xl px-4 py-3 mb-2">
+            <div>
+              <p class="font-semibold text-sm">${produit.nom}</p>
+              <p class="text-xs">${produit.prix} FCFA</p>
+            </div>
+            <button 
+              class="bg-[#c3831e] text-white text-lg w-8 h-8 rounded-full flex items-center justify-center add-plat-btn"
+              data-nom="${produit.nom}" 
+              data-prix="${produit.prix}"
+              data-id="${produit.id}"
+            >
+              <i class="fas fa-plus"></i>
+            </button>
+          </div>
+        `;
+        container.insertAdjacentHTML("beforeend", platHTML);
+      });
+
+      // Ajouter les articles à la commande
+      container.querySelectorAll('.add-plat-btn').forEach(btn => {
+        btn.addEventListener('click', () => {
+          const nom = btn.getAttribute('data-nom');
+          const prix = parseInt(btn.getAttribute('data-prix'));
+          const id = btn.getAttribute('data-id');
+
+          ajouterArticle(nom, prix, id);
+        });
+      });
+    }
+
+    function ajouterArticle(nom, prix, id) {
+      // Vérifier si l'article existe déjà dans le panier
+      const existant = panier.find(item => item.nom === nom);
+      
+      if (existant) {
+        existant.quantite++;
+      } else {
+        panier.push({ nom, prix, quantite: 1, id });
+      }
+
+      document.getElementById("empty-message").style.display = "none";
+      afficherCommande();
+      updateTotal();
+    }
+
+    function updateTotal() {
+      const total = panier.reduce((sum, item) => sum + item.prix * item.quantite, 0);
+      const btn = document.getElementById("submit-btn");
+
+      document.getElementById("total").innerText = total;
+
+      if (total === 0) {
+        btn.disabled = true;
+        btn.classList.remove("bg-[#070B7F]");
+        btn.classList.add("bg-[#9B9BFF]");
+      } else {
+        btn.disabled = false;
+        btn.classList.remove("bg-[#9B9BFF]");
+        btn.classList.add("bg-[#070B7F]");
+      }
+    }
+
+    function highlightFilter(activeCat) {
+      document.querySelectorAll('#filters button').forEach(btn => {
+        const cat = btn.getAttribute('data-categorie');
+        if (cat === activeCat) {
+          btn.classList.add('bg-[#F1C96F]', 'text-white');
+          btn.classList.remove('bg-gray-200');
+        } else {
+          btn.classList.remove('bg-[#F1C96F]', 'text-white');
+          btn.classList.add('bg-gray-200');
+        }
+      });
+    }
+
+    function afficherCommande() {
+      const commandeContainer = document.getElementById("commande");
+      commandeContainer.innerHTML = "";
+
+      panier.forEach((item, index) => {
+        const articleHTML = `
+          <div class="bg-white p-3 rounded-xl shadow flex items-center justify-between mb-2">
+            <div>
+              <p class="font-bold text-sm">${item.nom}</p>
+              <p class="text-xs text-gray-600">${item.prix} FCFA</p>
+            </div>
+            <div class="flex items-center gap-2">
+              <button class="text-sm bg-gray-200 px-2 rounded font-bold text-lg" onclick="modifierQuantite(${index}, -1)">-</button>
+              <span class="text-sm">${item.quantite}</span>
+              <button class="text-sm bg-gray-200 px-2 rounded font-bold text-lg" onclick="modifierQuantite(${index}, 1)">+</button>
+              <button class="text-red-500 text-xs ml-2" onclick="supprimerArticle(${index})">🗑</button>
+            </div>
+          </div>
+        `;
+        commandeContainer.insertAdjacentHTML("beforeend", articleHTML);
+      });
+    }
+
+    function modifierQuantite(index, changement) {
+      panier[index].quantite += changement;
+      if (panier[index].quantite <= 0) {
+        panier.splice(index, 1);
+      }
+      afficherCommande();
+      updateTotal();
+      
+      if (panier.length === 0) {
+        document.getElementById("empty-message").style.display = "block";
+      }
+    }
+
+    function supprimerArticle(index) {
+      panier.splice(index, 1);
+      afficherCommande();
+      updateTotal();
+      
+      if (panier.length === 0) {
+        document.getElementById("empty-message").style.display = "block";
+      }
+    }
+
+    // Fonction pour afficher les messages
+    function afficherMessage(message, type) {
+      const container = document.getElementById("confirmation-message");
+      container.innerHTML = "";
+      
+      const messageDiv = document.createElement("div");
+      messageDiv.innerText = message;
+      messageDiv.className = type === "success" 
+        ? "mt-2 text-green-600 font-semibold text-sm whitespace-nowrap" 
+        : "mt-2 text-red-600 font-semibold text-sm whitespace-nowrap";
+      
+      container.appendChild(messageDiv);
+      
+      // Supprimer le message après 5 secondes
+      setTimeout(() => {
+        container.innerHTML = "";
+      }, 5000);
+    }
+
+    // Fonction pour envoyer une commande
+    async function envoyerCommande() {
+      try {
+        const motif = document.getElementById("motif").value.trim();
+        
+        // Préparer les données pour l'API selon le format attendu
+        const commandeData = {
+          motif: motif,
+          items: panier.map(item => ({
+            plat_id: parseInt(item.id), // Convertir en nombre entier pour s'assurer que c'est du bon format
+            quantite: item.quantite
+          }))
+        };
+        
+        // Afficher un indicateur de chargement
+        const submitBtn = document.getElementById("submit-btn");
+        const originalText = submitBtn.innerHTML;
+        submitBtn.disabled = true;
+        submitBtn.innerHTML = `<i class="fas fa-spinner fa-spin"></i> Envoi...`;
+        
+        // Envoyer la commande
+        const response = await fetch('/api/order-proxy', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json'
+          },
+          body: JSON.stringify(commandeData)
+        });
+        
+        const data = await response.json();
+        
+        if (data.success) {
+          // Réinitialisation
+          panier.length = 0;
+          document.getElementById("commande").innerHTML = "";
+          document.getElementById("motif").value = "";
+          document.getElementById("empty-message").style.display = "block";
+          updateTotal();
+          
+          // Afficher un message de succès
+          afficherMessage("Commande envoyée avec succès !", "success");
+        } else {
+          // Afficher un message d'erreur
+          afficherMessage(data.message || "Erreur lors de l'envoi de la commande", "error");
+        }
+      } catch (error) {
+        console.error('Erreur commande:', error);
+        afficherMessage("Erreur de connexion au serveur", "error");
+      } finally {
+        // Restaurer le bouton
+        const submitBtn = document.getElementById("submit-btn");
+        submitBtn.disabled = false;
+        submitBtn.innerHTML = "Passer la commande";
+      }
+    }
+
+    // Initialisation - exécuté au chargement de la page
+    document.addEventListener("DOMContentLoaded", () => {
+      // Charger le menu au chargement de la page
+      fetchMenu();
+      
+      // Gestionnaire d'événement pour le bouton de soumission
+      document.getElementById("submit-btn").addEventListener("click", envoyerCommande);
+      
+      // Clic sur boutons de filtre
+      document.querySelectorAll('#filters button').forEach(btn => {
+        btn.addEventListener("click", () => {
+          const cat = btn.getAttribute("data-categorie");
+          categorieActive = cat;
+          renderPlats(categorieActive);
+          highlightFilter(categorieActive);
+        });
+      });
+      
+      // Recherche en direct
+      document.getElementById("recherche").addEventListener("input", () => {
+        renderPlats(categorieActive);
+      });
     });
-  });
-
-  // Recherche en direct
-  document.addEventListener("DOMContentLoaded", () => {
-    document.getElementById("recherche").addEventListener("input", () => {
-      renderPlats(categorieActive);
-    });
-  });
-
-  function afficherCommande() {
-  const commandeContainer = document.getElementById("commande");
-  commandeContainer.innerHTML = "";
-
-  panier.forEach((item, index) => {
-    const articleHTML = `
-      <div class="bg-white p-3 rounded-xl shadow flex items-center justify-between mb-2">
-        <div>
-          <p class="font-bold text-sm">${item.nom}</p>
-          <p class="text-xs text-gray-600">${item.prix} FCFA</p>
-        </div>
-        <div class="flex items-center gap-2">
-          <button class="text-sm bg-gray-200 px-2 rounded font-bold text-lg" onclick="modifierQuantite(${index}, -1)">-</button>
-          <span class="text-sm">${item.quantite}</span>
-          <button class="text-sm bg-gray-200 px-2 rounded font-bold text-lg" onclick="modifierQuantite(${index}, 1)">+</button>
-          <button class="text-red-500 text-xs ml-2" onclick="supprimerArticle(${index})">🗑</button>
-        </div>
-      </div>
-    `;
-    commandeContainer.insertAdjacentHTML("beforeend", articleHTML);
-  });
-}
-
-function modifierQuantite(index, changement) {
-  panier[index].quantite += changement;
-  if (panier[index].quantite <= 0) {
-    panier.splice(index, 1);
-  }
-  afficherCommande();
-  updateTotal();
-}
-
-function supprimerArticle(index) {
-  panier.splice(index, 1);
-  afficherCommande();
-  updateTotal();
-}
-
-
-document.getElementById("submit-btn").addEventListener("click", () => {
-  const motif = document.getElementById("motif").value.trim();
-
-  const commandeFinale = {
-    articles: panier,
-    commentaire: motif
-  };
-
-  console.log("Commande envoyée :", commandeFinale);
-
-  // --- Réinitialisation ---
-  panier.length = 0;
-  document.getElementById("commande").innerHTML = "";
-  document.getElementById("motif").value = "";
-  updateTotal();
-
-  // Affiche un message de succès
-  const message = document.createElement("div");
-  message.innerText = "Commande envoyée avec succès !";
-  message.className = "mt-4 text-green-600 font-semibold text-sm text-center";
-
-  const container = document.getElementById("confirmation-message");
-  container.innerHTML = ""; // vide les anciens messages
-  container.appendChild(message);
-
-  // Supprime le message après 3 secondes
-  setTimeout(() => {
-    container.innerHTML = "";
-  }, 3000);
-});
-
-
-
-</script>
-
-
+  </script>
+</body>
 </html>

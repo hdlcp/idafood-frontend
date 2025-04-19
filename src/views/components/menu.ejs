@@ -6,21 +6,21 @@ class="fixed top-0 left-0 h-full w-64 bg-black text-white transform -translate-x
  
  <div class="mt-8 flex flex-col items-center">
     <% if (utilisateur.role === 'serveur') { %>
-   <button onclick="window.location.href='/commandes_attente'" class="bg-green-600 w-48 text-white font-semibold py-2 my-2 rounded-full">Servir une commande</button>
-   <button onclick="window.location.href='/nouvelle_commande'" class="bg-blue-800 w-48 text-white font-semibold py-2 my-2 rounded-full">Nouvelle commande</button>
+   <a href="/commandes_attente" class="bg-green-600 w-48 text-white font-semibold py-2 my-2 rounded-full text-center">Servir une commande</a>
+   <a href="/nouvelle_commande" class="bg-blue-800 w-48 text-white font-semibold py-2 my-2 rounded-full text-center">Nouvelle commande</a>
 
    <% } else if (utilisateur.role === 'caissiere') { %>
-    <button onclick="window.location.href='/finaliser_commande'" class="bg-green-600 w-48 text-white font-semibold py-2 my-2 rounded-full">Finaliser une commande</button>
-    <button onclick="window.location.href='/ajout_depense'" class="bg-blue-800 w-48 text-white font-semibold py-2 my-2 rounded-full">Ajouter une dépense</button>
-    <button onclick="window.location.href='/point_journee'" class="bg-red-800 w-48 text-white font-semibold py-2 my-2 rounded-full">Point de la journée</button>
+    <a href="/finaliser_commande" class="bg-green-600 w-48 text-white font-semibold py-2 my-2 rounded-full text-center">Finaliser une commande</a>
+    <a href="/ajout_depense" class="bg-blue-800 w-48 text-white font-semibold py-2 my-2 rounded-full text-center">Ajouter une dépense</a>
+    <a href="/point_journee" class="bg-red-800 w-48 text-white font-semibold py-2 my-2 rounded-full text-center">Point de la journée</a>
 
     <% } else if (utilisateur.role === 'boss') { %>
-    <button onclick="window.location.href='/employes'" class="bg-green-600 w-48 text-white font-semibold py-2 my-2 rounded-full">Employés</button>
-    <button onclick="window.location.href='/point_de_journee'" class="bg-blue-800 w-48 text-white font-semibold py-2 my-2 rounded-full">Points de la journée</button>
-    <button onclick="window.location.href='/point_general'" class="bg-red-800 w-48 text-white font-semibold py-2 my-2 rounded-full">Points Générale</button>
+    <a href="/employes" class="bg-green-600 w-48 text-white font-semibold py-2 my-2 rounded-full text-center">Employés</a>
+    <a href="/point_de_journee" class="bg-blue-800 w-48 text-white font-semibold py-2 my-2 rounded-full text-center">Points de la journée</a>
+    <a href="/point_general" class="bg-red-800 w-48 text-white font-semibold py-2 my-2 rounded-full text-center">Points Générale</a>
     <% } %>
   <!-- Bouton déconnexion (toujours là) -->
-   <button onclick="window.location.href='/login'" class="bg-ida-gold w-48 text-white font-semibold py-2 my-2 rounded-full">Déconnexion</button>
+   <a href="/logout" class="bg-ida-gold w-48 text-white font-semibold py-2 my-2 rounded-full text-center">Déconnexion</a>
  </div>
 </div>
 <!-- Bouton de fermeture -->
@@ -38,10 +38,10 @@ const toggleBtn = document.getElementById("menu-toggle");
 const closeBtn = document.getElementById("menu-close");
 
 toggleBtn.addEventListener("click", () => {
-menu.classList.remove("-translate-x-full");
+  menu.classList.remove("-translate-x-full");
 });
 
 closeBtn.addEventListener("click", () => {
-menu.classList.add("-translate-x-full");
+  menu.classList.add("-translate-x-full");
 });
 </script>

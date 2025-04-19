@@ -4,100 +4,43 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <script src="https://cdn.tailwindcss.com"></script>
-  <script src="https://kit.fontawesome.com/yourkit.js" crossorigin="anonymous"></script> <!-- remplace par ta propre clé FontAwesome -->
+  <script src="https://kit.fontawesome.com/83eaa4b7f0.js" crossorigin="anonymous"></script>
   <title>Commandes en attente</title>
 </head>
 <body class="bg-gray-100">
     <style>
         @keyframes slideOut {
-  0% {
-    opacity: 1;
-    transform: translateY(0);
-  }
-  100% {
-    opacity: 0;
-    transform: translateY(20px);
-  }
-}
+          0% {
+            opacity: 1;
+            transform: translateY(0);
+          }
+          100% {
+            opacity: 0;
+            transform: translateY(20px);
+          }
+        }
 
-.commande.slide-out {
-  animation: slideOut 0.4s ease forwards;
-}
-
+        .commande.slide-out {
+          animation: slideOut 0.4s ease forwards;
+        }
     </style>
 
- <!-- Header -->
- <header>
+  <!-- Header -->
+  <header>
     <%- include('../components/header') %>
     <%- include('../components/menu') %>
   </header>
 
   <main id="liste-commandes" class="p-4 space-y-4">
-    <% const commandes = [
-    {
-        id: 1,
-        plats: [
-          { nom: "Salade mixte", prix: 3500, quantite: 1 },
-          { nom: "Poulet braisé", prix: 5000, quantite: 2 }
-        ],
-        commentaire: "table 1, couple marié avec enfant"
-      },
-      {
-        id: 2,
-        plats: [
-          { nom: "Pizza 4 fromages", prix: 7000, quantite: 1 }
-        ],
-        commentaire: "table 2, étudiants en pause"
-      },
-      {
-        id: 3,
-        plats: [
-          { nom: "Pizza 4 fromages", prix: 7000, quantite: 1 }
-        ],
-        commentaire: "table 2, étudiants en pause"
-      },
-      {
-        id: 4,
-        plats: [
-          { nom: "Pizza 4 fromages", prix: 7000, quantite: 1 }
-        ],
-        commentaire: "table 2, étudiants en pause"
-      }
-    ]; %>
-
-    <% commandes.forEach(commande => { %>
-      <div class=" commande bg-white p-4 rounded-xl shadow space-y-2 relative" data-id="<%= commande.id %>">
-        <div class="flex justify-between items-center">
-          <div class="flex space-x-4">
-            <!-- Annuler -->
-            <button onclick="confirmerAction(<%= commande.id %>, 'annuler')" class="btn-annuler text-red-500 text-xl">
-                <i class="fas fa-times-circle"></i>
-            </button>
-            <!-- Valider -->
-            <button onclick="confirmerAction(<%= commande.id %>, 'valider')" class="btn-valider text-green-600 text-x">
-                <i class="fas fa-check-circle"></i>
-            </button>
-          </div>
-          <span class="text-xs font-semibold"><%= commande.commentaire %></span>
-        </div>
-
-        <!-- Liste des plats -->
-        <% commande.plats.forEach(plat => { %>
-          <div class="bg-indigo-100 rounded-lg px-3 py-1 flex items-center justify-between">
-            <div>
-              <p class="text-sm font-semibold"><%= plat.nom %></p>
-              <p class="text-xs text-gray-600"><%= plat.prix %> FCFA</p>
-            </div>
-            <div class="bg-gray-300 text-sm w-7 h-7 flex items-center justify-center rounded-full">
-              <%= plat.quantite %>
-            </div>
-          </div>
-        <% }); %>
-      </div>
-    <% }); %>
+    <!-- Les commandes seront générées dynamiquement ici -->
+    <div id="loading" class="text-center py-8 text-gray-500">
+      <i class="fas fa-spinner fa-spin text-2xl"></i>
+      <p class="mt-2">Chargement des commandes...</p>
+    </div>
   </main>
+  
   <!-- Message si plus aucune commande -->
-<p id="aucune-commande" class="text-center text-gray-500 mt-8 hidden">
+  <p id="aucune-commande" class="text-center text-gray-500 mt-8 hidden">
     Aucune commande créée.
   </p>
 
@@ -114,56 +57,162 @@
 
   <script>
     let commandeId = null;
-let actionEnCours = null;
-
-function confirmerAction(id, action) {
-  commandeId = id;
-  actionEnCours = action;
-
-  const texte = action === 'valider'
-    ? "Voulez-vous confirmer que cette commande a été servie ?"
-    : "Voulez-vous vraiment annuler cette commande ?";
-
-  document.getElementById("modal-text").textContent = texte;
-  document.getElementById("modal").classList.remove("hidden");
-}
-
-function fermerModal() {
-  document.getElementById("modal").classList.add("hidden");
-  commandeId = null;
-  actionEnCours = null;
-}
-
-document.getElementById("confirm-btn").addEventListener("click", () => {
-  if (commandeId !== null && actionEnCours) {
-    const payload = {
-      commandeId,
-      action: actionEnCours
-    };
-
-    console.log("Données prêtes à envoyer au backend :", payload);
-
-    const commandeElement = document.querySelector(`.commande[data-id="${commandeId}"]`);
-    if (commandeElement) {
-      commandeElement.classList.add("slide-out");
-
-      // Attendre la fin de l'animation avant de supprimer
-      commandeElement.addEventListener("animationend", () => {
-        commandeElement.remove();
-
-        // Vérifie s’il reste des commandes
-        const commandesRestantes = document.querySelectorAll(".commande");
-        if (commandesRestantes.length === 0) {
-          document.getElementById("aucune-commande").classList.remove("hidden");
+    let actionEnCours = null;
+    
+    // Charger les commandes au chargement de la page
+    document.addEventListener('DOMContentLoaded', () => {
+      chargerCommandes();
+    });
+    
+    // Fonction pour charger les commandes depuis l'API
+    async function chargerCommandes() {
+      try {
+        document.getElementById('loading').classList.remove('hidden');
+        document.getElementById('aucune-commande').classList.add('hidden');
+        
+        const response = await fetch('/api/unserved-orders-proxy');
+        const result = await response.json();
+        
+        document.getElementById('loading').classList.add('hidden');
+        
+        if (result.success && result.data && result.data.length > 0) {
+          afficherCommandes(result.data);
+        } else {
+          document.getElementById('aucune-commande').classList.remove('hidden');
         }
+      } catch (error) {
+        console.error('Erreur lors du chargement des commandes:', error);
+        document.getElementById('loading').classList.add('hidden');
+        document.getElementById('liste-commandes').innerHTML = `
+          <div class="bg-red-100 p-4 rounded-xl text-center text-red-600">
+            <p>Erreur lors du chargement des commandes</p>
+            <button onclick="chargerCommandes()" class="mt-2 bg-red-500 text-white px-3 py-1 rounded-xl text-sm">
+              Réessayer
+            </button>
+          </div>
+        `;
+      }
+    }
+    
+    // Fonction pour afficher les commandes
+    function afficherCommandes(commandes) {
+      const container = document.getElementById('liste-commandes');
+      container.innerHTML = '';
+      
+      commandes.forEach(commande => {
+        let htmlCommande = `
+          <div class="commande bg-white p-4 rounded-xl shadow space-y-2 relative" data-id="${commande.id}">
+            <div class="flex justify-between items-center">
+              <div class="flex space-x-4">
+                <!-- Annuler -->
+                <button onclick="confirmerAction(${commande.id}, 'annuler')" class="btn-annuler text-red-500 text-xl">
+                  <i class="fas fa-times-circle"></i>
+                </button>
+                <!-- Valider -->
+                <button onclick="confirmerAction(${commande.id}, 'valider')" class="btn-valider text-green-600 text-xl">
+                  <i class="fas fa-check-circle"></i>
+                </button>
+              </div>
+              <span class="text-xs font-semibold">${commande.motif || 'Aucun motif spécifié'}</span>
+            </div>
+            
+            <!-- Liste des plats -->
+        `;
+        
+        // Vérifier si des articles existent dans la commande
+        if (commande.items && commande.items.length > 0) {
+          commande.items.forEach(plat => {
+            htmlCommande += `
+              <div class="bg-indigo-100 rounded-lg px-3 py-1 flex items-center justify-between">
+                <div>
+                  <p class="text-sm font-semibold">${plat.nom}</p>
+                  <p class="text-xs text-gray-600">${plat.prix_unitaire} FCFA</p>
+                </div>
+                <div class="bg-gray-300 text-sm w-7 h-7 flex items-center justify-center rounded-full">
+                  ${plat.quantite}
+                </div>
+              </div>
+            `;
+          });
+        } else {
+          htmlCommande += `
+            <p class="text-sm text-gray-500 italic">Aucun article dans cette commande</p>
+          `;
+        }
+        
+        htmlCommande += `</div>`;
+        container.insertAdjacentHTML('beforeend', htmlCommande);
       });
     }
 
-    fermerModal();
-  }
-});
+    function confirmerAction(id, action) {
+      commandeId = id;
+      actionEnCours = action;
 
+      const texte = action === 'valider'
+        ? "Voulez-vous confirmer que cette commande a été servie ?"
+        : "Voulez-vous vraiment annuler cette commande ?";
+
+      document.getElementById("modal-text").textContent = texte;
+      document.getElementById("modal").classList.remove("hidden");
+    }
+
+    function fermerModal() {
+      document.getElementById("modal").classList.add("hidden");
+      commandeId = null;
+      actionEnCours = null;
+    }
+
+    document.getElementById("confirm-btn").addEventListener("click", async () => {
+      if (commandeId !== null && actionEnCours) {
+        try {
+          let url, method;
+          
+          if (actionEnCours === 'valider') {
+            url = `/api/mark-served-proxy/${commandeId}`;
+            method = 'PUT';
+          } else {
+            url = `/api/delete-order-proxy/${commandeId}`;
+            method = 'DELETE';
+          }
+          
+          const response = await fetch(url, {
+            method: method,
+            headers: {
+              'Content-Type': 'application/json'
+            }
+          });
+          
+          const result = await response.json();
+          
+          if (result.success) {
+            const commandeElement = document.querySelector(`.commande[data-id="${commandeId}"]`);
+            if (commandeElement) {
+              commandeElement.classList.add("slide-out");
+
+              // Attendre la fin de l'animation avant de supprimer
+              commandeElement.addEventListener("animationend", () => {
+                commandeElement.remove();
+
+                // Vérifie s'il reste des commandes
+                const commandesRestantes = document.querySelectorAll(".commande");
+                if (commandesRestantes.length === 0) {
+                  document.getElementById("aucune-commande").classList.remove("hidden");
+                }
+              });
+            }
+          } else {
+            alert(`Erreur: ${result.message || 'Une erreur est survenue'}`);
+          }
+        } catch (error) {
+          console.error('Erreur lors de l\'action:', error);
+          alert('Erreur de connexion au serveur');
+        }
+
+        fermerModal();
+      }
+    });
   </script>
-
+  <script src="/js/auth-checker.js"></script>
 </body>
 </html>

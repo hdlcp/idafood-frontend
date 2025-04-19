@@ -44,12 +44,18 @@ app.set("views", [
 // Servir les fichiers statiques
 app.use(express.static(path.join(__dirname, "../public")));
 
-// Middleware pour vérifier l'authentification
+// Middleware pour vérifier l'authentification - MODIFIÉ
 const requireLogin = (req, res, next) => {
   if (!req.session.user) {
     console.log("Session non trouvée, redirection vers login");
     return res.redirect('/login');
   }
+  
+  if (!req.session.token) {
+    console.log("Token non trouvé dans la session, redirection vers login");
+    return res.redirect('/login');
+  }
+  
   console.log("Session trouvée, utilisateur:", req.session.user.nom);
   next();
 };
@@ -160,8 +166,9 @@ app.post("/login", async (req, res) => {
   }
 });
 
-// Route de déconnexion
+// Route de déconnexion - MODIFIÉ
 app.get("/logout", (req, res) => {
+  console.log("Déconnexion utilisateur:", req.session.user?.nom || "Inconnu");
   req.session.destroy((err) => {
     if (err) {
       console.error("Erreur lors de la déconnexion:", err);
@@ -180,45 +187,160 @@ app.get("/employes", requireLogin, (req, res) => {
 
 app.get("/point_de_journee", requireLogin, (req, res) => {
   res.render("administrateur/point_de_journee", {
-    utilisateur: req.session.user
+    utilisateur: req.session.user,
+    token: req.session.token  // Ajoutez cette ligne pour passer le token
   });
 });
 
 app.get("/point_general", requireLogin, (req, res) => {
   res.render("administrateur/point_general", {
-    utilisateur: req.session.user
+    utilisateur: req.session.user,
+    token: req.session.token  // Ajoutez cette ligne pour passer le token
   });
 });
 
 // Routes protégées - Caissière
 app.get("/ajout_depense", requireLogin, (req, res) => {
   res.render("caissiere/ajout_depense", {
-    utilisateur: req.session.user
+    utilisateur: req.session.user,
+    token: req.session.token  // Ajoutez cette ligne pour passer le token
   });
 });
 
 app.get("/point_journee", requireLogin, (req, res) => {
   res.render("caissiere/point_journee", {
-    utilisateur: req.session.user
+    utilisateur: req.session.user,
+    token: req.session.token  // Ajoutez cette ligne pour passer le token
   });
 });
 
 app.get("/finaliser_commande", requireLogin, (req, res) => {
   res.render("caissiere/finaliser_commande", {
-    utilisateur: req.session.user
+    utilisateur: req.session.user,
+    token: req.session.token  // Ajoutez cette ligne pour passer le token
   });
+});
+
+// Proxy pour récupérer le menu
+app.get("/api/menu-proxy", requireLogin, async (req, res) => {
+  try {
+    const response = await axios.get(`${API_URL}/api/menu/categorie_menu`, {
+      headers: {
+        Authorization: `Bearer ${req.session.token}`
+      }
+    });
+    
+    res.json(response.data);
+  } catch (error) {
+    console.error("Erreur de récupération du menu:", error.response?.data || error.message);
+    res.status(error.response?.status || 500).json({
+      success: false,
+      message: error.response?.data?.message || "Erreur de connexion au serveur"
+    });
+  }
+});
+
+// Proxy pour envoyer une commande
+app.post("/api/order-proxy", requireLogin, async (req, res) => {
+  try {
+    const response = await axios.post(`${API_URL}/api/order`, req.body, {
+      headers: {
+        Authorization: `Bearer ${req.session.token}`
+      }
+    });
+    
+    res.json(response.data);
+  } catch (error) {
+    console.error("Erreur d'envoi de commande:", error.response?.data || error.message);
+    res.status(error.response?.status || 500).json({
+      success: false,
+      message: error.response?.data?.message || "Erreur de connexion au serveur"
+    });
+  }
+});
+
+// Proxy pour récupérer les commandes non servies du serveur connecté
+app.get("/api/unserved-orders-proxy", requireLogin, async (req, res) => {
+  try {
+    console.log("Tentative de récupération des commandes non servies");
+    console.log("Token utilisé:", req.session.token ? "Token présent" : "Token absent");
+    
+    const response = await axios.get(`${API_URL}/api/order/my/unserved`, {
+      headers: {
+        Authorization: `Bearer ${req.session.token}`
+      }
+    });
+    
+    console.log("Réponse API commandes:", response.status);
+    res.json(response.data);
+  } catch (error) {
+    console.error("Erreur de récupération des commandes:");
+    if (error.response) {
+      console.error("Status:", error.response.status);
+      console.error("Données d'erreur:", error.response.data);
+    } else {
+      console.error("Erreur sans réponse:", error.message);
+    }
+    
+    res.status(error.response?.status || 500).json({
+      success: false,
+      message: error.response?.data?.message || "Erreur de connexion au serveur"
+    });
+  }
+});
+
+// Proxy pour marquer une commande comme servie
+app.put("/api/mark-served-proxy/:orderId", requireLogin, async (req, res) => {
+  try {
+    const orderId = req.params.orderId;
+    const response = await axios.put(`${API_URL}/api/order/${orderId}/serve`, {}, {
+      headers: {
+        Authorization: `Bearer ${req.session.token}`
+      }
+    });
+    
+    res.json(response.data);
+  } catch (error) {
+    console.error("Erreur lors du marquage de la commande:", error.response?.data || error.message);
+    res.status(error.response?.status || 500).json({
+      success: false,
+      message: error.response?.data?.message || "Erreur de connexion au serveur"
+    });
+  }
+});
+
+// Proxy pour supprimer une commande
+app.delete("/api/delete-order-proxy/:orderId", requireLogin, async (req, res) => {
+  try {
+    const orderId = req.params.orderId;
+    const response = await axios.delete(`${API_URL}/api/order/${orderId}`, {
+      headers: {
+        Authorization: `Bearer ${req.session.token}`
+      }
+    });
+    
+    res.json(response.data);
+  } catch (error) {
+    console.error("Erreur lors de la suppression de la commande:", error.response?.data || error.message);
+    res.status(error.response?.status || 500).json({
+      success: false,
+      message: error.response?.data?.message || "Erreur de connexion au serveur"
+    });
+  }
 });
 
 // Routes protégées - Serveur
 app.get("/nouvelle_commande", requireLogin, (req, res) => {
   res.render("serveur/nouvelle_commande", {
-    utilisateur: req.session.user
+    utilisateur: req.session.user,
+    token: req.session.token  // Ajoutez cette ligne pour passer le token
   });
 });
 
 app.get("/commandes_attente", requireLogin, (req, res) => {
   res.render("serveur/commandes_attente", {
-    utilisateur: req.session.user
+    utilisateur: req.session.user,
+    token: req.session.token  // Ajoutez cette ligne pour passer le token
   });
 });
 
@@ -226,6 +348,7 @@ app.get("/commandes_attente", requireLogin, (req, res) => {
 app.get("/commande_totale", requireLogin, (req, res) => {
   res.render("cuisiniere/commande_totale", {
     utilisateur: req.session.user,
+    token: req.session.token,  // Ajoutez cette ligne pour passer le token
     commandes: [
       {
         serveur: "Thomas BONO",
@@ -274,6 +397,15 @@ app.get("/commande_totale", requireLogin, (req, res) => {
         commentaire: "table 1, couple marié avec enfant, pas trop de sel"
       }
     ]
+  });
+});
+
+// NOUVELLE ROUTE: Vérification de l'état d'authentification
+app.get("/api/auth-status", (req, res) => {
+  return res.json({
+    authenticated: !!req.session.user && !!req.session.token,
+    userName: req.session.user?.nom || null,
+    role: req.session.user?.role || null
   });
 });
 
