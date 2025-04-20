@@ -104,22 +104,40 @@
           const responseAchats = await fetch('/api/purchase-stats-proxy');
           const dataAchats = await responseAchats.json();
           
+          // Valeurs par défaut
+          let totalCommandes = 0;
+          let totalMomo = 0;
+          let totalEspeces = 0;
+          let totalDepenses = 0;
+          
           if (dataCommandes.success) {
             const statsCommandes = dataCommandes.data;
-            document.getElementById('total-commandes').textContent = formatMontant(statsCommandes.total_paye);
-            document.getElementById('total-momo').textContent = formatMontant(statsCommandes.total_momo);
-            document.getElementById('total-espece').textContent = formatMontant(statsCommandes.total_especes);
+            totalCommandes = statsCommandes.total_paye || 0;
+            totalMomo = statsCommandes.total_momo || 0;
+            totalEspeces = statsCommandes.total_especes || 0;
+            
+            document.getElementById('total-commandes').textContent = formatMontant(totalCommandes);
+            document.getElementById('total-momo').textContent = formatMontant(totalMomo);
+            document.getElementById('total-espece').textContent = formatMontant(totalEspeces);
           }
           
-          if (responseAchats.success) {
-            const totalDepenses = dataAchats.data.total_achats;
+          // Important: Pour les achats, vérifier si les données existent même si success est false
+          if (dataAchats.data && dataAchats.data.total_achats !== undefined) {
+            totalDepenses = dataAchats.data.total_achats;
             document.getElementById('total-depenses').textContent = formatMontant(totalDepenses);
-            
-            // Calculer la caisse
-            const totalCommandes = dataCommandes.data.total_paye;
-            const caisse = totalCommandes - totalDepenses;
-            document.getElementById('total-caisse').textContent = formatMontant(caisse);
           }
+          
+          // Calculer la caisse
+          const caisse = totalCommandes - totalDepenses;
+          document.getElementById('total-caisse').textContent = formatMontant(caisse);
+          
+          console.log("Données chargées:", {
+            totalCommandes,
+            totalMomo,
+            totalEspeces,
+            totalDepenses,
+            caisse
+          });
         } catch (error) {
           console.error('Erreur lors du chargement des données:', error);
         }
