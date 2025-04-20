@@ -116,7 +116,7 @@
             document.getElementById('total-depenses').textContent = formatMontant(totalDepenses);
             
             // Calculer la caisse
-            const totalCommandes = dataCommandes.success ? dataCommandes.data.total_paye : 0;
+            const totalCommandes = dataCommandes.data.total_paye;
             const caisse = totalCommandes - totalDepenses;
             document.getElementById('total-caisse').textContent = formatMontant(caisse);
           }

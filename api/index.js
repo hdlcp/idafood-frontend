@@ -496,6 +496,63 @@ app.delete("/api/purchase-delete-proxy/:id", requireLogin, async (req, res) => {
     });
   }
 });
+// Proxy pour récupérer toutes les commandes non payées
+app.get("/api/unpaid-orders-all-proxy", requireLogin, async (req, res) => {
+  try {
+    const response = await axios.get(`${API_URL}/api/order/unpaid/all`, {
+      headers: {
+        Authorization: `Bearer ${req.session.token}`
+      }
+    });
+    
+    res.json(response.data);
+  } catch (error) {
+    console.error("Erreur de récupération des commandes non payées:", error.response?.data || error.message);
+    res.status(error.response?.status || 500).json({
+      success: false,
+      message: error.response?.data?.message || "Erreur de connexion au serveur"
+    });
+  }
+});
+
+// Proxy pour récupérer toutes les commandes payées
+app.get("/api/paid-orders-proxy", requireLogin, async (req, res) => {
+  try {
+    const response = await axios.get(`${API_URL}/api/order/paid/all`, {
+      headers: {
+        Authorization: `Bearer ${req.session.token}`
+      }
+    });
+    
+    res.json(response.data);
+  } catch (error) {
+    console.error("Erreur de récupération des commandes payées:", error.response?.data || error.message);
+    res.status(error.response?.status || 500).json({
+      success: false,
+      message: error.response?.data?.message || "Erreur de connexion au serveur"
+    });
+  }
+});
+
+// Proxy pour marquer une commande comme payée
+app.put("/api/pay-order-proxy/:orderId", requireLogin, async (req, res) => {
+  try {
+    const orderId = req.params.orderId;
+    const response = await axios.put(`${API_URL}/api/order/${orderId}/pay`, req.body, {
+      headers: {
+        Authorization: `Bearer ${req.session.token}`
+      }
+    });
+    
+    res.json(response.data);
+  } catch (error) {
+    console.error("Erreur lors du paiement de la commande:", error.response?.data || error.message);
+    res.status(error.response?.status || 500).json({
+      success: false,
+      message: error.response?.data?.message || "Erreur de connexion au serveur"
+    });
+  }
+});
 
 // Routes protégées - Cuisinière
 app.get("/commande_totale", requireLogin, (req, res) => {

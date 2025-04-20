@@ -4,8 +4,8 @@
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <script src="https://cdn.tailwindcss.com"></script>
-    <script src="https://kit.fontawesome.com/your-kit-id.js" crossorigin="anonymous"></script>
-    <title>Finaliser_commande - IDA Food</title>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/axios/1.6.2/axios.min.js"></script>
+    <title>Finaliser Commande - IDA Food</title>
   </head>
 
   <body class="bg-[#f2f2f2] min-h-screen flex flex-col">
@@ -15,119 +15,331 @@
       <%- include('../components/menu') %>
     </header>
 
-    <% const commandes = [
-    {
-      id: 1,
-      serveur: 'Thomas BONO',
-      commentaire: 'table 1, couple marié avec enfant',
-      articles: [
-        { nom: 'Salade mixte', prix: 3500, quantite: 1 },
-        { nom: 'Brochette de bœuf', prix: 4000, quantite: 1 },
-        { nom: 'Jus de bissap', prix: 1000, quantite: 1 }
-      ],
-      total: 8500
-    },
-    {
-      id: 2,
-      serveur: 'Aline K',
-      commentaire: 'table 3, famille avec enfants',
-      articles: [
-        { nom: 'Poulet DG', prix: 5000, quantite: 1 },
-        { nom: 'Sodas', prix: 1500, quantite: 2 }
-      ],
-      total: 8000
-    },
-    {
-        id: 3,
-        serveur: 'Aline K',
-        commentaire: 'table 3, famille avec enfants',
-        articles: [
-          { nom: 'Poulet DG', prix: 5000, quantite: 1 },
-          { nom: 'Sodas', prix: 1500, quantite: 2 }
-        ],
-        total: 8000
-      },
-      {
-        id: 4,
-        serveur: 'Aline K',
-        commentaire: 'table 3, famille avec enfants',
-        articles: [
-          { nom: 'Poulet DG', prix: 5000, quantite: 1 },
-          { nom: 'Sodas', prix: 1500, quantite: 2 }
-        ],
-        total: 8000
-      }
-  ]; %>
+    <!-- Notifications -->
+    <div id="notification" class="fixed top-4 right-4 z-50 transform transition-transform duration-300 translate-x-full">
+      <div class="bg-green-600 text-white px-4 py-2 rounded-lg shadow-lg">
+        <p id="notification-message">Message de notification</p>
+      </div>
+    </div>
 
-  <!-- Section Commandes en attente -->
-  <main class="p-4">
-    <section id="commandes-en-attente" class="space-y-4">
-      <% commandes.forEach(commande => { %>
-        <div class="commande bg-white p-4 rounded-xl shadow" data-id="<%= commande.id %>">
+    <!-- Overlay de chargement -->
+    <div id="loading-overlay" class="fixed inset-0 bg-black bg-opacity-50 z-40 flex items-center justify-center hidden">
+      <div class="bg-white p-5 rounded-lg shadow-lg flex flex-col items-center">
+        <div class="w-12 h-12 border-4 border-[#c3831e] border-t-transparent rounded-full animate-spin"></div>
+        <p class="mt-3 text-gray-700 font-semibold">Chargement en cours...</p>
+      </div>
+    </div>
+
+    <!-- Main Content -->
+    <main class="p-4 flex-grow">
+      <h1 class="text-2xl font-bold text-[#c3831e] mb-4">Commandes à finaliser</h1>
+
+      <div class="flex flex-col lg:flex-row gap-4">
+        <!-- Section Commandes en attente de paiement -->
+        <section id="commandes-non-payees" class="lg:w-1/2 space-y-4">
+          <h2 class="text-xl font-semibold text-blue-900">Commandes à payer</h2>
+          <div id="loading-unpaid" class="p-4 flex justify-center">
+            <div class="w-8 h-8 border-4 border-[#c3831e] border-t-transparent rounded-full animate-spin"></div>
+          </div>
+          <div id="unpaid-orders-container" class="space-y-4"></div>
+        </section>
+
+        <!-- Section Commandes payées -->
+        <section id="commandes-payees" class="lg:w-1/2 space-y-4">
+          <h2 class="text-xl font-semibold text-green-600">Commandes payées</h2>
+          <div id="loading-paid" class="p-4 flex justify-center">
+            <div class="w-8 h-8 border-4 border-[#c3831e] border-t-transparent rounded-full animate-spin"></div>
+          </div>
+          <div id="paid-orders-container" class="space-y-4"></div>
+        </section>
+      </div>
+    </main>
+
+    <!-- Template pour les commandes non payées -->
+    <template id="commande-non-payee-template">
+      <div class="commande bg-white p-4 rounded-xl shadow" data-id="">
+        <div class="flex justify-between items-center">
           <p class="text-green-600 font-bold">✔</p>
-          <p class="text-sm text-right italic"><%= commande.commentaire %></p>
-          <p class="text-[#c3831e] font-bold">serveur : <%= commande.serveur %></p>
-          <div class="my-2">
-            <% commande.articles.forEach(article => { %>
-                  <div class=" px-3 py-1 flex items-center justify-between">
-                    <div>
-                      <p class="text-sm font-semibold"><%= article.nom %></p>
-                      <p class="text-xs text-gray-600"><%= article.prix %> FCFA</p>
-                    </div>
-                    <div class="bg-gray-300 text-sm w-7 h-7 flex items-center justify-center rounded-full">
-                      <%= article.quantite %>
-                    </div>
-                  </div>
-
-            <% }) %>
-          </div>
-          <div class="flex justify-between items-center mt-4">
-            <p class="text-lg font-bold text-[#c3831e]">Totale :</p>
-            <p class="text-lg font-bold"><%= commande.total %> FCFA</p>
-          </div>
-          <div class="flex space-x-2 mt-4">
-            <button onclick="payerCommande(this, 'momo')" class="btn-momo bg-green-600 text-white px-4 py-2 rounded-full font-bold">A payer en momo</button>
-            <button onclick="payerCommande(this, 'espece')" class="btn-espece bg-blue-900 text-white px-4 py-2 rounded-full font-bold">A payer en espèce</button>
-          </div>
+          <p class="text-sm italic commentaire"></p>
         </div>
-      <% }) %>
-    </section>
+        <p class="text-[#c3831e] font-bold serveur-nom mt-2"></p>
+        <div class="my-2 articles-container"></div>
+        <div class="flex justify-between items-center mt-4">
+          <p class="text-lg font-bold text-[#c3831e]">Total :</p>
+          <p class="text-lg font-bold total-amount"></p>
+        </div>
+        <div class="flex flex-wrap gap-2 mt-4">
+          <button class="btn-momo bg-green-600 text-white px-4 py-2 rounded-full font-bold">Payer en Mobile Money</button>
+          <button class="btn-espece bg-blue-900 text-white px-4 py-2 rounded-full font-bold">Payer en espèces</button>
+        </div>
+      </div>
+    </template>
 
-    <!-- Section Commandes payées -->
-    <hr class="my-6 border-gray-400" />
-    <section id="commandes-payees" class="space-y-4"></section>
-  </main>
+    <!-- Template pour les commandes payées -->
+    <template id="commande-payee-template">
+      <div class="commande bg-white p-4 rounded-xl shadow" data-id="">
+        <div class="flex justify-between items-center">
+          <p class="text-green-600 font-bold">✔</p>
+          <p class="text-sm italic commentaire"></p>
+        </div>
+        <p class="text-[#c3831e] font-bold serveur-nom mt-2"></p>
+        <div class="my-2 articles-container"></div>
+        <div class="flex justify-between items-center mt-4">
+          <p class="text-lg font-bold text-[#c3831e]">Total :</p>
+          <p class="text-lg font-bold total-amount"></p>
+        </div>
+        <div class="mt-4">
+          <div class="moyen-paiement px-4 py-2 rounded-full font-bold text-center"></div>
+        </div>
+      </div>
+    </template>
 
-  <!-- Script pour gérer le paiement -->
-  <script>
-    function payerCommande(button, mode) {
-      const commande = button.closest('.commande');
-      const id = commande.dataset.id;
+    <!-- Template pour un article -->
+    <template id="article-template">
+      <div class="px-3 py-1 flex items-center justify-between">
+        <div>
+          <p class="text-sm font-semibold article-nom"></p>
+          <p class="text-xs text-gray-600 article-prix"></p>
+        </div>
+        <div class="bg-gray-300 text-sm w-7 h-7 flex items-center justify-center rounded-full article-quantite"></div>
+      </div>
+    </template>
 
-      // Simuler un appel backend (facultatif)
-      fetch(`/paiement/${id}`, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ modePaiement: mode })
+    <!-- Script pour gérer le paiement -->
+    <script>
+      document.addEventListener('DOMContentLoaded', () => {
+        // Chargement initial des données
+        loadUnpaidOrders();
+        loadPaidOrders();
+
+        // Rafraîchir les données toutes les 30 secondes
+        setInterval(() => {
+          loadUnpaidOrders();
+          loadPaidOrders();
+        }, 30000);
       });
 
-      // Créer le nouveau bouton avec le mode de paiement choisi
-      const btnContainer = document.createElement("div");
-      const newBtn = document.createElement("button");
-      newBtn.textContent = mode === 'momo' ? "A payer en momo" : "A payer en espèce";
-      newBtn.className = `border-2 ${mode === 'momo' ? 'border-green-600 text-green-600' : 'border-blue-900 text-blue-900'} px-4 py-2 rounded-full font-bold`;
-      btnContainer.className = "mt-4";
-      btnContainer.appendChild(newBtn);
+      // Fonction pour afficher une notification
+      function showNotification(message, type = 'success') {
+        const notification = document.getElementById('notification');
+        const notificationMessage = document.getElementById('notification-message');
+        
+        // Définir le message
+        notificationMessage.textContent = message;
+        
+        // Définir la couleur selon le type
+        const notificationBox = notification.querySelector('div');
+        notificationBox.className = type === 'success' 
+          ? 'bg-green-600 text-white px-4 py-2 rounded-lg shadow-lg'
+          : 'bg-red-600 text-white px-4 py-2 rounded-lg shadow-lg';
+        
+        // Afficher la notification
+        notification.classList.remove('translate-x-full');
+        
+        // Cacher la notification après 3 secondes
+        setTimeout(() => {
+          notification.classList.add('translate-x-full');
+        }, 3000);
+      }
 
-      // Supprimer les anciens boutons
-      commande.querySelector('.flex.space-x-2')?.remove();
+      // Fonction pour afficher l'overlay de chargement
+      function showLoading() {
+        document.getElementById('loading-overlay').classList.remove('hidden');
+      }
 
-      // Ajouter le nouveau bouton
-      commande.appendChild(btnContainer);
+      // Fonction pour cacher l'overlay de chargement
+      function hideLoading() {
+        document.getElementById('loading-overlay').classList.add('hidden');
+      }
 
-      // Déplacer la commande dans la section "payées"
-      document.getElementById('commandes-payees').appendChild(commande);
-    }
-  </script>
-</body>
+      // Fonction pour charger les commandes non payées
+      async function loadUnpaidOrders() {
+        document.getElementById('loading-unpaid').style.display = 'flex';
+        document.getElementById('unpaid-orders-container').innerHTML = '';
+        
+        try {
+          const response = await axios.get('/api/unpaid-orders-all-proxy');
+          
+          if (response.data.success) {
+            const orders = response.data.data || [];
+            
+            if (orders.length === 0) {
+              document.getElementById('unpaid-orders-container').innerHTML = 
+                '<p class="text-gray-500 italic">Aucune commande en attente de paiement</p>';
+            } else {
+              orders.forEach(order => renderUnpaidOrder(order));
+            }
+          } else {
+            showNotification("Impossible de charger les commandes non payées", "error");
+            document.getElementById('unpaid-orders-container').innerHTML = 
+              '<p class="text-gray-500 italic">Aucune commande à afficher</p>';
+          }
+        } catch (error) {
+          console.error("Erreur de chargement des commandes non payées:", error);
+          showNotification("Erreur de chargement des données", "error");
+          document.getElementById('unpaid-orders-container').innerHTML = 
+            '<p class="text-gray-500 italic">Aucune commande à afficher</p>';
+        } finally {
+          document.getElementById('loading-unpaid').style.display = 'none';
+        }
+      }
+
+      // Fonction pour charger les commandes payées
+      async function loadPaidOrders() {
+        document.getElementById('loading-paid').style.display = 'flex';
+        document.getElementById('paid-orders-container').innerHTML = '';
+        
+        try {
+          const response = await axios.get('/api/paid-orders-proxy');
+          
+          if (response.data.success) {
+            const orders = response.data.data || [];
+            
+            if (orders.length === 0) {
+              document.getElementById('paid-orders-container').innerHTML = 
+                '<p class="text-gray-500 italic">Aucune commande payée</p>';
+            } else {
+              orders.forEach(order => renderPaidOrder(order));
+            }
+          } else {
+            showNotification("Impossible de charger les commandes payées", "error");
+            document.getElementById('paid-orders-container').innerHTML = 
+              '<p class="text-gray-500 italic">Aucune commande à afficher</p>';
+          }
+        } catch (error) {
+          console.error("Erreur de chargement des commandes payées:", error);
+          showNotification("Erreur de chargement des données", "error");
+          document.getElementById('paid-orders-container').innerHTML = 
+            '<p class="text-gray-500 italic">Aucune commande à afficher</p>';
+        } finally {
+          document.getElementById('loading-paid').style.display = 'none';
+        }
+      }
+
+      // Fonction pour afficher une commande non payée
+      function renderUnpaidOrder(order) {
+        try {
+          const template = document.getElementById('commande-non-payee-template');
+          const container = document.getElementById('unpaid-orders-container');
+          
+          const clone = document.importNode(template.content, true);
+          const commande = clone.querySelector('.commande');
+          
+          // Définir l'ID de la commande
+          commande.dataset.id = order.id;
+          
+          // Remplir les informations de la commande
+          commande.querySelector('.serveur-nom').textContent = `Serveur: ${order.serveur || 'Non assigné'}`;
+          commande.querySelector('.commentaire').textContent = order.motif || 'Aucun commentaire';
+          commande.querySelector('.total-amount').textContent = `${formatMoney(order.total)} FCFA`;
+          
+          // Remplir les articles
+          const articlesContainer = commande.querySelector('.articles-container');
+          
+          order.items.forEach(item => {
+            const articleTemplate = document.getElementById('article-template');
+            const articleClone = document.importNode(articleTemplate.content, true);
+            
+            articleClone.querySelector('.article-nom').textContent = item.nom;
+            articleClone.querySelector('.article-prix').textContent = `${formatMoney(item.prix_unitaire)} FCFA`;
+            articleClone.querySelector('.article-quantite').textContent = item.quantite;
+            
+            articlesContainer.appendChild(articleClone);
+          });
+          
+          // Ajouter les gestionnaires d'événements pour les boutons de paiement
+          commande.querySelector('.btn-momo').addEventListener('click', () => payOrder(order.id, 'momo'));
+          commande.querySelector('.btn-espece').addEventListener('click', () => payOrder(order.id, 'espece'));
+          
+          // Ajouter la commande au conteneur
+          container.appendChild(commande);
+        } catch (error) {
+          console.error("Erreur lors du rendu d'une commande non payée:", error);
+        }
+      }
+
+      // Fonction pour afficher une commande payée
+      function renderPaidOrder(order) {
+        try {
+          const template = document.getElementById('commande-payee-template');
+          const container = document.getElementById('paid-orders-container');
+          
+          const clone = document.importNode(template.content, true);
+          const commande = clone.querySelector('.commande');
+          
+          // Définir l'ID de la commande
+          commande.dataset.id = order.id;
+          
+          // Remplir les informations de la commande
+          commande.querySelector('.serveur-nom').textContent = `Serveur: ${order.serveur || 'Non assigné'}`;
+          commande.querySelector('.commentaire').textContent = order.motif || 'Aucun commentaire';
+          commande.querySelector('.total-amount').textContent = `${formatMoney(order.total)} FCFA`;
+          
+          // Remplir les articles
+          const articlesContainer = commande.querySelector('.articles-container');
+          
+          order.items.forEach(item => {
+            const articleTemplate = document.getElementById('article-template');
+            const articleClone = document.importNode(articleTemplate.content, true);
+            
+            articleClone.querySelector('.article-nom').textContent = item.nom;
+            articleClone.querySelector('.article-prix').textContent = `${formatMoney(item.prix_unitaire)} FCFA`;
+            articleClone.querySelector('.article-quantite').textContent = item.quantite;
+            
+            articlesContainer.appendChild(articleClone);
+          });
+          
+          // Afficher le moyen de paiement
+          const paiementElement = commande.querySelector('.moyen-paiement');
+          
+          if (order.paiement === 'momo') {
+            paiementElement.textContent = 'Payé par Mobile Money';
+            paiementElement.className = 'moyen-paiement border-2 border-green-600 text-green-600 px-4 py-2 rounded-full font-bold text-center';
+          } else {
+            paiementElement.textContent = 'Payé en espèces';
+            paiementElement.className = 'moyen-paiement border-2 border-blue-900 text-blue-900 px-4 py-2 rounded-full font-bold text-center';
+          }
+          
+          // Ajouter la commande au conteneur
+          container.appendChild(commande);
+        } catch (error) {
+          console.error("Erreur lors du rendu d'une commande payée:", error);
+        }
+      }
+
+      // Fonction pour payer une commande
+      async function payOrder(orderId, moyenPaiement) {
+        showLoading();
+        
+        try {
+          const response = await axios.put(`/api/pay-order-proxy/${orderId}`, {
+            moyen: moyenPaiement
+          });
+          
+          if (response.data.success) {
+            showNotification(response.data.message, 'success');
+            
+            // Rafraîchir les listes
+            loadUnpaidOrders();
+            loadPaidOrders();
+          } else {
+            showNotification(response.data.message || "Échec du paiement", 'error');
+          }
+        } catch (error) {
+          console.error("Erreur de paiement:", error);
+          showNotification("Veuillez servir la commande d'abord", 'error');
+        } finally {
+          hideLoading();
+        }
+      }
+
+      // Fonction pour formater les montants
+      function formatMoney(amount) {
+        if (amount === undefined || amount === null) return "0";
+        return amount.toString().replace(/\B(?=(\d{3})+(?!\d))/g, " ");
+      }
+    </script>
+
+       <script src="/js/auth-checker.js"></script>
+  </body>
 </html>

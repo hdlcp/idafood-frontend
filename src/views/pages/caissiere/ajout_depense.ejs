@@ -17,12 +17,44 @@
     </header>
 
     <!-- CONTENU PRINCIPAL -->
-
     <main class="flex-1 p-4 flex flex-col justify-center items-center text-center">
-      <p id="empty-message" class="text-gray-500 mb-8 text-sm">Aucun article sélectionné</p>
-      <!-- Liste des dépenses ajoutées -->
-    <div id="depense-liste" class="w-full max-w-md space-y-2 mb-6"></div>
+      <!-- Indicateur de chargement -->
+      <div id="loading" class="bg-white p-4 rounded-xl shadow text-center mb-4 w-full max-w-md hidden">
+        <p class="text-gray-700">Chargement en cours...</p>
+      </div>
 
+      <!-- Messages d'alerte -->
+      <div id="alert" class="bg-green-100 border-l-4 border-green-500 text-green-700 p-4 rounded shadow-sm mb-4 w-full max-w-md hidden">
+        <div class="flex items-center">
+          <div class="py-1">
+            <svg class="h-6 w-6 text-green-500 mr-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path>
+            </svg>
+          </div>
+          <div>
+            <p id="alert-message" class="font-bold"></p>
+          </div>
+        </div>
+      </div>
+
+      <!-- Message d'erreur -->
+      <div id="error-alert" class="bg-red-100 border-l-4 border-red-500 text-red-700 p-4 rounded shadow-sm mb-4 w-full max-w-md hidden">
+        <div class="flex items-center">
+          <div class="py-1">
+            <svg class="h-6 w-6 text-red-500 mr-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
+            </svg>
+          </div>
+          <div>
+            <p id="error-message" class="font-bold"></p>
+          </div>
+        </div>
+      </div>
+      
+      <p id="empty-message" class="text-gray-500 mb-8 text-sm">Aucun article sélectionné</p>
+      
+      <!-- Liste des dépenses ajoutées -->
+      <div id="depense-liste" class="w-full max-w-md space-y-2 mb-6"></div>
     </main>
 
     <!-- FOOTER -->
@@ -80,35 +112,57 @@
         const depenseListe = document.getElementById("depense-liste");
         const totalSpan = document.getElementById("total");
         const emptyMessage = document.getElementById("empty-message");
-      
+        const loadingElement = document.getElementById("loading");
+        const alertElement = document.getElementById("alert");
+        const errorAlertElement = document.getElementById("error-alert");
+        const alertMessageElement = document.getElementById("alert-message");
+        const errorMessageElement = document.getElementById("error-message");
+    
         let total = 0;
         let depenses = [];
-      
-        // Créer un toast pour les notifications
-        function showToast(message, isError = false) {
-          // Supprimer les toasts existants
-          const oldToasts = document.querySelectorAll('.toast');
-          oldToasts.forEach(toast => toast.remove());
+    
+        // Fonctions de gestion des alertes
+        function showAlert(message, isError = false) {
+          // Masquer les deux alertes d'abord
+          alertElement.classList.add("hidden");
+          errorAlertElement.classList.add("hidden");
           
-          // Créer le nouveau toast
-          const toast = document.createElement('div');
-          toast.className = `fixed top-20 left-1/2 transform -translate-x-1/2 z-50 px-4 py-2 rounded-lg shadow-lg ${isError ? 'bg-red-500' : 'bg-green-500'} text-white`;
-          toast.textContent = message;
-          document.body.appendChild(toast);
+          // Afficher l'alerte appropriée
+          if (isError) {
+            errorMessageElement.textContent = message;
+            errorAlertElement.classList.remove("hidden");
+          } else {
+            alertMessageElement.textContent = message;
+            alertElement.classList.remove("hidden");
+          }
           
-          // Supprimer après 3 secondes
+          // Cacher l'alerte après 5 secondes
           setTimeout(() => {
-            toast.remove();
-          }, 3000);
+            if (isError) {
+              errorAlertElement.classList.add("hidden");
+            } else {
+              alertElement.classList.add("hidden");
+            }
+          }, 5000);
         }
-      
+    
+        // Fonction pour afficher/masquer l'indicateur de chargement
+        function showLoading(visible) {
+          if (visible) {
+            loadingElement.classList.remove("hidden");
+          } else {
+            loadingElement.classList.add("hidden");
+          }
+        }
+    
         // Charger les dépenses existantes
         async function chargerDepenses() {
+          showLoading(true);
           try {
             const response = await fetch('/api/purchase-list-proxy');
             const data = await response.json();
             
-            if (data.success || Array.isArray(data.data)) { // Modifié pour accepter même si success est false
+            if (Array.isArray(data.data)) {
               // Réinitialiser les données
               depenses = data.data;
               total = 0;
@@ -126,21 +180,30 @@
                 emptyMessage.classList.remove("hidden");
                 totalSpan.textContent = 0;
               }
+              
+              if (!data.success) {
+                // Si success est false mais qu'on a quand même des données
+                showAlert(data.message || "Les dépenses ont été chargées avec des avertissements", true);
+              }
             } else {
-              showToast(data.message || "Erreur lors du chargement des dépenses", true);
+              showAlert(data.message || "Erreur lors du chargement des dépenses", true);
+              emptyMessage.classList.remove("hidden");
             }
           } catch (error) {
             console.error('Erreur:', error);
-            showToast("Erreur de connexion au serveur", true);
+            showAlert("Erreur de connexion au serveur", true);
+            emptyMessage.classList.remove("hidden");
+          } finally {
+            showLoading(false);
           }
         }
-      
+    
         // Ajouter une carte de dépense à l'interface
         function ajouterCarteDependse(depense) {
           const carte = document.createElement("div");
           carte.className = "bg-white p-3 rounded-xl shadow flex justify-between items-center";
           carte.dataset.id = depense.id;
-      
+    
           carte.innerHTML = `
             <div class="text-left">
               <p class="font-bold">${depense.nom_produit}</p>
@@ -151,62 +214,68 @@
               <button class="text-red-500 font-bold text-xl btn-supprimer">&times;</button>
             </div>
           `;
-      
+    
           // Gestion de la suppression
           carte.querySelector(".btn-supprimer").addEventListener("click", async () => {
-            try {
-              const response = await fetch(`/api/purchase-delete-proxy/${depense.id}`, {
-                method: 'DELETE'
-              });
-              const data = await response.json();
-              
-              if (data.success) {
-                // Au lieu de supprimer seulement un élément, on recharge toute la liste
-                chargerDepenses();
-                showToast("Dépense supprimée avec succès");
-              } else {
-                showToast(data.message || "Erreur lors de la suppression", true);
+            if (confirm('Voulez-vous vraiment supprimer cette dépense ?')) {
+              showLoading(true);
+              try {
+                const response = await fetch(`/api/purchase-delete-proxy/${depense.id}`, {
+                  method: 'DELETE'
+                });
+                const data = await response.json();
+                
+                if (data.success) {
+                  // Recharger toute la liste
+                  chargerDepenses();
+                  showAlert("Dépense supprimée avec succès");
+                } else {
+                  showAlert(data.message || "Erreur lors de la suppression", true);
+                }
+              } catch (error) {
+                console.error('Erreur:', error);
+                showAlert("Erreur de connexion au serveur", true);
+              } finally {
+                showLoading(false);
               }
-            } catch (error) {
-              console.error('Erreur:', error);
-              showToast("Erreur de connexion au serveur", true);
             }
           });
-      
+    
           depenseListe.appendChild(carte);
         }
-      
+    
         // Ouvrir le popup
         openBtn.addEventListener("click", () => {
-          console.log("OUVERTURE DU POPUP !");
           popup.classList.remove("translate-y-full");
         });
-      
+    
         // Fermer le popup
         closeBtn.addEventListener("click", () => {
           popup.classList.add("translate-y-full");
         });
-      
+    
         // Soumettre le formulaire
         form.addEventListener("submit", async (e) => {
           e.preventDefault();
-      
+          showLoading(true);
+    
           const nomProduit = form.elements[0].value;
           const prixUnitaire = parseInt(form.elements[1].value);
           const quantite = parseInt(form.elements[2].value);
-      
+    
           if (!nomProduit || isNaN(prixUnitaire) || isNaN(quantite)) {
-            showToast("Veuillez remplir tous les champs correctement", true);
+            showAlert("Veuillez remplir tous les champs correctement", true);
+            showLoading(false);
             return;
           }
-      
+    
           // Préparer les données pour l'API
           const depenseData = {
             nom_produit: nomProduit,
             prix_unitaire: prixUnitaire,
             quantite: quantite
           };
-      
+    
           try {
             const response = await fetch('/api/purchase-create-proxy', {
               method: 'POST',
@@ -219,24 +288,25 @@
             const data = await response.json();
             
             if (data.success) {
-              // Au lieu d'ajouter manuellement la nouvelle dépense à l'UI,
-              // on recharge toutes les dépenses pour s'assurer d'avoir les données à jour
+              // Recharger toutes les dépenses pour s'assurer d'avoir les données à jour
               chargerDepenses();
               
               // Réinitialiser le formulaire et fermer le popup
               form.reset();
               popup.classList.add("translate-y-full");
               
-              showToast("Dépense ajoutée avec succès");
+              showAlert("Dépense ajoutée avec succès");
             } else {
-              showToast(data.message || "Erreur lors de l'ajout de la dépense", true);
+              showAlert(data.message || "Erreur lors de l'ajout de la dépense", true);
             }
           } catch (error) {
             console.error('Erreur:', error);
-            showToast("Erreur de connexion au serveur", true);
+            showAlert("Erreur de connexion au serveur", true);
+          } finally {
+            showLoading(false);
           }
         });
-      
+    
         // Charger les dépenses au chargement de la page
         chargerDepenses();
       });
