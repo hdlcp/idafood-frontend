@@ -555,59 +555,41 @@ app.put("/api/pay-order-proxy/:orderId", requireLogin, async (req, res) => {
 });
 
 // Routes protégées - Cuisinière
-app.get("/commande_totale", requireLogin, (req, res) => {
-  res.render("cuisiniere/commande_totale", {
-    utilisateur: req.session.user,
-    token: req.session.token,  // Ajoutez cette ligne pour passer le token
-    commandes: [
-      {
-        serveur: "Thomas BONO",
-        articles: [
-          { nom: "Salade mixte", prix: 3500 },
-          { nom: "Salade mixte", prix: 3500 },
-          { nom: "Salade mixte", prix: 3500 }
-        ],
-        total: 20000,
-        commentaire: "table 1, couple marié avec enfant, pas trop de sel"
-      },
-      {
-        serveur: "Thomas BONO",
-        articles: [
-          { nom: "Salade mixte", prix: 3500 },
-          { nom: "Salade mixte", prix: 3500 },
-          { nom: "Salade mixte", prix: 3500 },
-          { nom: "Salade mixte", prix: 3500 },
-          { nom: "Salade mixte", prix: 3500 }
-        ],
-        total: 20000,
-        commentaire: "table 1, couple marié avec enfant, pas trop de sel"
-      },
-      {
-        serveur: "Thomas BONO",
-        articles: [
-          { nom: "Salade mixte", prix: 3500 },
-          { nom: "Salade mixte", prix: 3500 },
-          { nom: "Salade mixte", prix: 3500 },
-          { nom: "Salade mixte", prix: 3500 },
-          { nom: "Salade mixte", prix: 3500 }
-        ],
-        total: 20000,
-        commentaire: "table 1, couple marié avec enfant, pas trop de sel"
-      },
-      {
-        serveur: "Thomas BONO",
-        articles: [
-          { nom: "Salade mixte", prix: 3500 },
-          { nom: "Salade mixte", prix: 3500 },
-          { nom: "Salade mixte", prix: 3500 },
-          { nom: "Salade mixte", prix: 3500 },
-          { nom: "Salade mixte", prix: 3500 }
-        ],
-        total: 20000,
-        commentaire: "table 1, couple marié avec enfant, pas trop de sel"
+// Routes protégées - Cuisinière
+app.get("/commande_totale", requireLogin, async (req, res) => {
+  try {
+    // Appel à l'API pour récupérer les commandes non servies
+    const response = await axios.get(`${API_URL}/api/order/unserved/all`, {
+      headers: {
+        Authorization: `Bearer ${req.session.token}`
       }
-    ]
-  });
+    });
+    
+    // Si la requête réussit
+    if (response.data.success) {
+      res.render("cuisiniere/commande_totale", {
+        utilisateur: req.session.user,
+        token: req.session.token,
+        commandes: response.data.data  // Passer les données récupérées
+      });
+    } else {
+      // En cas d'erreur dans la réponse de l'API
+      res.render("cuisiniere/commande_totale", {
+        utilisateur: req.session.user,
+        token: req.session.token,
+        commandes: [],  // Tableau vide en cas d'erreur
+        error: response.data.message
+      });
+    }
+  } catch (error) {
+    console.error("Erreur lors de la récupération des commandes:", error.response?.data || error.message);
+    res.render("cuisiniere/commande_totale", {
+      utilisateur: req.session.user,
+      token: req.session.token,
+      commandes: [],  // Tableau vide en cas d'erreur
+      error: "Erreur de connexion au serveur"
+    });
+  }
 });
 
 // NOUVELLE ROUTE: Vérification de l'état d'authentification

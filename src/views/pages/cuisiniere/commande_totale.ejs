@@ -59,32 +59,51 @@
 </head>
 <body class="bg-[#f2f2f2] min-h-screen flex flex-col">
 
-<!-- Header -->
-<header>
+  <!-- Header -->
+  <header>
     <%- include('../components/header') %>
   </header>
+
+  <!-- Message d'erreur éventuel -->
+  <% if (typeof error !== 'undefined' && error) { %>
+    <div class="bg-red-100 border-l-4 border-red-500 text-red-700 p-4 m-4" role="alert">
+      <p><%= error %></p>
+    </div>
+  <% } %>
+
+  <!-- Message si aucune commande -->
+  <% if (commandes.length === 0 && !error) { %>
+    <div class="bg-blue-100 border-l-4 border-blue-500 text-blue-700 p-4 m-4" role="alert">
+      <p>Aucune commande non servie pour le moment.</p>
+    </div>
+  <% } %>
 
   <!-- DYNAMIQUE : Affichage des commandes -->
   <div class="grid grid-cols-1 md:grid-cols-2 gap-4 p-4">
     <% commandes.forEach(cmd => { %>
       <div class="card">
-        <h4>serveur : <%= cmd.serveur %></h4>
-        <% cmd.articles.forEach(article => { %>
+        <h4>Serveur : <%= cmd.serveur %></h4>
+        <% cmd.items.forEach(item => { %>
           <div class="item">
-            <div><%= article.nom %></div>
-            <div><%= article.prix %> FCFA</div>
+            <div><%= item.nom %> (<%= item.quantite %>)</div>
+            <div><%= item.total %> FCFA</div>
           </div>
         <% }) %>
-        <div class="total">Totale : <%= cmd.total %> FCFA</div>
+        <div class="total">Total : <%= cmd.total %> FCFA</div>
         <div class="validate-icon">✔️</div>
-        <div class="footer"><%= cmd.commentaire %></div>
+        <div class="footer"><%= cmd.motif || 'Aucun commentaire' %></div>
       </div>
     <% }) %>
   </div>
 
   <!-- Bouton de rafraîchissement -->
   <button class="refresh-btn" onclick="location.reload()">⟳</button>
-  
 
+  <script>
+    // Rafraîchir automatiquement la page toutes les 30 secondes
+    setTimeout(() => {
+      location.reload();
+    }, 30000);
+  </script>
 </body>
 </html>
