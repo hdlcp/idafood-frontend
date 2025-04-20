@@ -5,6 +5,7 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <script src="https://cdn.tailwindcss.com"></script>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
   <title>Point de la journée - IDA Food</title>
 </head>
 <body class="bg-[#f2f2f2] min-h-screen flex flex-col">
@@ -15,193 +16,335 @@
     <%- include('../components/menu') %>
   </header>
 
-  <% const pointjournee = {
-    totalCommandes: 350000,
-    totalMomo: 40500,
-    totalEspece: 60500,
-    totalDepenses: 35000,
-    totalCaisse: 340000,
-    commandes: [
-      {
-        serveur: 'Thomas BONO',
-        commentaire: 'table 1, couple marié avec enfant',
-        articles: [
-          { nom: 'Salade mixte', prix: 3500, quantite: 1 },
-          { nom: 'Salade mixte', prix: 3500, quantite: 1 },
-          { nom: 'Salade mixte', prix: 3500, quantite: 1 }
-        ],
-        total: 20000,
-        paiement: 'momo'
-      },
-      {
-        serveur: 'Thomas BONO',
-        commentaire: 'table 1, couple marié avec enfant',
-        articles: [
-          { nom: 'Salade mixte', prix: 3500, quantite: 3 }
-        ],
-        total: 20000,
-        paiement: 'espèce'
-      },
-      {
-        serveur: 'Thomas BONO',
-        commentaire: 'table 1, couple marié avec enfant',
-        articles: [
-          { nom: 'Salade mixte', prix: 3500, quantite: 3 }
-        ],
-        total: 20000,
-        paiement: 'espèce'
-      },
-      {
-        serveur: 'Thomas BONO',
-        commentaire: 'table 1, couple marié avec enfant',
-        articles: [
-          { nom: 'Salade mixte', prix: 3500, quantite: 3 }
-        ],
-        total: 20000,
-        paiement: 'espèce'
-      }
-    ],
-    depenses: [
-      { nom: 'Salade', prix: 3500, quantite: 1 },
-      { nom: 'Ognon', prix: 500, quantite: 7 },
-      { nom: 'Piment', prix: 500, quantite: 3 },
-      { nom: 'Viande', prix: 5000, quantite: 1 }
-    ]
-  }; %> 
-
   <!-- CONTENU PRINCIPAL -->
-<main class="flex-grow px-4 py-6">
-  <!-- Vue initiale -->
-  <div id="vue-initiale" class="space-y-3">
-    <div class="bg-white p-4 rounded-xl shadow">
-      <p class="font-bold text-[#c3831e]">Totale commandes :</p>
-      <div class="flex items-center space-x-2 mt-1">
-        <p id="total-commandes" class="font-bold text-gray-800"><%= pointjournee.totalCommandes %> FCFA</p>
-        <button onclick="afficherCommandes()">
-          <i class="fas fa-eye text-green-600 ml-40"></i>
-        </button>
+  <main class="flex-grow px-4 py-6">
+    <!-- Vue initiale -->
+    <div id="vue-initiale" class="space-y-3">
+      <div class="bg-white p-4 rounded-xl shadow">
+        <p class="font-bold text-[#c3831e]">Totale commandes :</p>
+        <div class="flex items-center space-x-2 mt-1">
+          <p id="total-commandes" class="font-bold text-gray-800">
+            <span id="totalCommandes">Chargement...</span> FCFA
+          </p>
+          <button onclick="afficherCommandes()" class="ml-auto">
+            <i class="fas fa-eye text-green-600"></i>
+          </button>
+        </div>
       </div>
-    </div>
 
-    <div class="bg-white p-4 rounded-xl shadow">
-      <p class="font-bold text-[#c3831e]">Totale commande momo :</p>
-      <div class="flex items-center space-x-2 mt-1">
-        <p class="font-bold text-gray-800"><%= pointjournee.totalMomo %> FCFA</p>
+      <div class="bg-white p-4 rounded-xl shadow">
+        <p class="font-bold text-[#c3831e]">Totale commande momo :</p>
+        <div class="flex items-center space-x-2 mt-1">
+          <p class="font-bold text-gray-800">
+            <span id="totalMomo">Chargement...</span> FCFA
+          </p>
+        </div>
       </div>
-    </div>
 
-    <div class="bg-white p-4 rounded-xl shadow">
-      <p class="font-bold text-[#c3831e]">Totale commande espèce :</p>
-      <div class="flex items-center space-x-2 mt-1">
-        <p class="font-bold text-gray-800"><%= pointjournee.totalEspece %> FCFA</p>
+      <div class="bg-white p-4 rounded-xl shadow">
+        <p class="font-bold text-[#c3831e]">Totale commande espèce :</p>
+        <div class="flex items-center space-x-2 mt-1">
+          <p class="font-bold text-gray-800">
+            <span id="totalEspece">Chargement...</span> FCFA
+          </p>
+        </div>
       </div>
-    </div>
 
-    <div class="bg-white p-4 rounded-xl shadow">
-      <p class="font-bold text-[#c3831e]">Totale dépenses :</p>
-      <div class="flex items-center space-x-2 mt-1">
-        <p class="font-bold text-gray-800"><%= pointjournee.totalDepenses %> FCFA</p>
-        <button onclick="afficherDepenses()">
-          <i class="fas fa-eye text-green-600 ml-40"></i>
-        </button>
+      <div class="bg-white p-4 rounded-xl shadow">
+        <p class="font-bold text-[#c3831e]">Totale dépenses :</p>
+        <div class="flex items-center space-x-2 mt-1">
+          <p class="font-bold text-gray-800">
+            <span id="totalDepenses">Chargement...</span> FCFA
+          </p>
+          <button onclick="afficherDepenses()" class="ml-auto">
+            <i class="fas fa-eye text-green-600"></i>
+          </button>
+        </div>
       </div>
-    </div>
+      
       <!-- Footer -->
-<footer>
-  <div class="bg-white p-4 rounded-t-xl shadow flex justify-between items-center">
-    <p class="font-bold text-[#c3831e]">Caisse :</p>
-    <p id="total-caisse" class="font-bold text-gray-800"><%= pointjournee.totalCaisse %> FCFA</p>
-  </div>
-</footer>
-  </div>
+      <footer>
+        <div class="bg-white p-4 rounded-t-xl shadow flex justify-between items-center">
+          <p class="font-bold text-[#c3831e]">Caisse :</p>
+          <p id="total-caisse" class="font-bold text-gray-800">
+            <span id="totalCaisse">Chargement...</span> FCFA
+          </p>
+        </div>
+      </footer>
+    </div>
 
 
- <!-- Vue commandes -->
-<div id="vue-commandes" class="hidden">
-  <button onclick="retourAccueil()" class="mb-4 text-[#c3831e] font-semibold hover:underline">&larr; Retour</button>
-  <% pointjournee.commandes.forEach(c => { %>
-    <div class="bg-white p-4 rounded-xl shadow mb-4">
-      <p class="text-green-600 font-bold">✔</p>
-      <p class="text-sm text-right italic"><%= c.commentaire %></p>
-      <p class="text-[#c3831e] font-bold">serveur : <%= c.serveur %></p>
-
-      <div class="my-2">
-        <% c.articles.forEach(article => { %>
-          <div class="px-3 py-1 flex items-center justify-between">
-            <div>
-              <p class="text-sm font-semibold"><%= article.nom %></p>
-              <p class="text-xs text-gray-600"><%= article.prix %> FCFA</p>
-            </div>
-            <div class="bg-gray-300 text-sm w-7 h-7 flex items-center justify-center rounded-full">
-              <%= article.quantite %>
-            </div>
-          </div>
-        <% }) %>
-      </div>
-
-      <div class="flex justify-between items-center mt-4">
-        <p class="text-lg font-bold text-[#c3831e]">Totale :</p>
-        <p class="text-lg font-bold"><%= c.total %> FCFA</p>
-      </div>
-
-      <div class="flex space-x-2 mt-4">
-        <% if (c.paiement === 'momo') { %>
-          <button class="bg-green-600 text-white px-4 py-2 rounded-full font-bold">A payer en momo</button>
-        <% } else { %>
-          <button class="bg-blue-900 text-white px-4 py-2 rounded-full font-bold">A payer en espèce</button>
-        <% } %>
+   <!-- Vue commandes -->
+  <div id="vue-commandes" class="hidden">
+    <button onclick="retourAccueil()" class="mb-4 text-[#c3831e] font-semibold hover:underline">&larr; Retour</button>
+    <div id="listeCommandes" class="space-y-4">
+      <!-- La liste des commandes sera chargée ici dynamiquement -->
+      <div class="flex justify-center items-center py-8">
+        <div class="animate-spin rounded-full h-8 w-8 border-b-2 border-[#c3831e]"></div>
+        <span class="ml-2 text-gray-600">Chargement des commandes...</span>
       </div>
     </div>
-  <% }) %>
-</div>
+  </div>
 
 
- <!-- Vue dépenses -->
-<div id="vue-depenses" class="hidden">
-  <button onclick="retourAccueil()" class="mb-4 text-[#c3831e] font-semibold hover:underline">&larr; Retour</button>
-  <div class="space-y-2 bg-gray-100 p-4 rounded-xl">
-    <% pointjournee.depenses.forEach(d => { %>
-      <div class="bg-white px-4 py-2 rounded-xl shadow flex justify-between items-center">
-        <div>
-          <p class="text-sm font-semibold"><%= d.nom %></p>
-          <p class="text-xs text-gray-600"><%= d.prix %> FCFA</p>
-        </div>
-        <div class="bg-gray-300 text-sm w-7 h-7 flex items-center justify-center rounded-full font-bold">
-          <%= d.quantite %>
+  <!-- Vue dépenses -->
+  <div id="vue-depenses" class="hidden">
+    <button onclick="retourAccueil()" class="mb-4 text-[#c3831e] font-semibold hover:underline">&larr; Retour</button>
+    <div class="space-y-2 bg-gray-100 p-4 rounded-xl">
+      <div id="listeDepenses">
+        <!-- La liste des dépenses sera chargée ici dynamiquement -->
+        <div class="flex justify-center items-center py-8">
+          <div class="animate-spin rounded-full h-8 w-8 border-b-2 border-[#c3831e]"></div>
+          <span class="ml-2 text-gray-600">Chargement des dépenses...</span>
         </div>
       </div>
-    <% }) %>
 
-    <!-- Total général -->
-    <div class="mt-6 border-t pt-2 border-gray-300 flex justify-between text-black font-bold text-lg">
-      <span>Total :</span>
-      <span>
-        <%= pointjournee.depenses.reduce((acc, d) => acc + d.prix * d.quantite, 0) %> FCFA
-      </span>
+      <!-- Total général sera mis à jour dynamiquement -->
+      <div class="mt-6 border-t pt-2 border-gray-300 flex justify-between text-black font-bold text-lg">
+        <span>Total :</span>
+        <span id="totalDepensesFooter">Chargement...</span>
+      </div>
     </div>
   </div>
-</div>
 </main>
-
-
 
 <!-- JS -->
 <script>
+  // Variables globales pour stocker les données
+  let orderStats = null;
+  let purchaseStats = null;
+  let commandes = [];
+  let depenses = [];
+
+  // Fonction pour charger les données initiales
+  async function chargerDonnees() {
+    try {
+      // Charger les statistiques des commandes
+      const responseOrderStats = await fetch('/api/order-stats-proxy');
+      if (!responseOrderStats.ok) throw new Error('Erreur lors du chargement des statistiques de commandes');
+      const orderStatsData = await responseOrderStats.json();
+      
+      if (orderStatsData.success) {
+        orderStats = orderStatsData.data;
+        document.getElementById('totalCommandes').textContent = orderStats.total_paye ? orderStats.total_paye.toLocaleString() : '0';
+        document.getElementById('totalMomo').textContent = orderStats.total_momo ? orderStats.total_momo.toLocaleString() : '0';
+        document.getElementById('totalEspece').textContent = orderStats.total_especes ? orderStats.total_especes.toLocaleString() : '0';
+      } else {
+        document.getElementById('totalCommandes').textContent = '0';
+        document.getElementById('totalMomo').textContent = '0';
+        document.getElementById('totalEspece').textContent = '0';
+        console.error('Erreur API:', orderStatsData.message);
+      }
+      
+      // Charger les statistiques des dépenses
+      const responsePurchaseStats = await fetch('/api/purchase-stats-proxy');
+      if (!responsePurchaseStats.ok) throw new Error('Erreur lors du chargement des statistiques de dépenses');
+      const purchaseStatsData = await responsePurchaseStats.json();
+      
+      if (purchaseStatsData.success) {
+        purchaseStats = purchaseStatsData.data;
+        document.getElementById('totalDepenses').textContent = purchaseStats.total_achats ? purchaseStats.total_achats.toLocaleString() : '0';
+      } else {
+        document.getElementById('totalDepenses').textContent = '0';
+        console.error('Erreur API:', purchaseStatsData.message);
+      }
+      
+      // Calculer le total de la caisse
+      const totalCommandes = orderStats?.total_paye || 0;
+      const totalDepenses = purchaseStats?.total_achats || 0;
+      const totalCaisse = totalCommandes - totalDepenses;
+      document.getElementById('totalCaisse').textContent = totalCaisse.toLocaleString();
+      
+    } catch (error) {
+      console.error('Erreur lors du chargement des données:', error);
+      document.getElementById('totalCommandes').textContent = 'Erreur';
+      document.getElementById('totalMomo').textContent = 'Erreur';
+      document.getElementById('totalEspece').textContent = 'Erreur';
+      document.getElementById('totalDepenses').textContent = 'Erreur';
+      document.getElementById('totalCaisse').textContent = 'Erreur';
+    }
+  }
+
+  // Fonction pour charger et afficher les commandes
+  async function chargerCommandes() {
+    try {
+      const response = await fetch('/api/paid-orders-proxy');
+      if (!response.ok) throw new Error('Erreur lors du chargement des commandes');
+      const data = await response.json();
+      
+      if (data.success) {
+        commandes = data.data;
+        afficherListeCommandes();
+      } else {
+        document.getElementById('listeCommandes').innerHTML = `
+          <div class="bg-red-100 p-4 rounded-xl text-red-700">
+            <p>Erreur lors du chargement des commandes: ${data.message}</p>
+          </div>
+        `;
+        console.error('Erreur API:', data.message);
+      }
+    } catch (error) {
+      document.getElementById('listeCommandes').innerHTML = `
+        <div class="bg-red-100 p-4 rounded-xl text-red-700">
+          <p>Erreur lors du chargement des commandes: ${error.message}</p>
+        </div>
+      `;
+      console.error('Erreur:', error);
+    }
+  }
+
+  // Fonction pour charger et afficher les dépenses
+  async function chargerDepenses() {
+    try {
+      const response = await fetch('/api/purchase-list-proxy');
+      if (!response.ok) throw new Error('Erreur lors du chargement des dépenses');
+      const data = await response.json();
+      
+      if (data.success) {
+        depenses = data.data;
+        afficherListeDepenses();
+      } else {
+        document.getElementById('listeDepenses').innerHTML = `
+          <div class="bg-red-100 p-4 rounded-xl text-red-700">
+            <p>Erreur lors du chargement des dépenses: ${data.message}</p>
+          </div>
+        `;
+        console.error('Erreur API:', data.message);
+      }
+    } catch (error) {
+      document.getElementById('listeDepenses').innerHTML = `
+        <div class="bg-red-100 p-4 rounded-xl text-red-700">
+          <p>Erreur lors du chargement des dépenses: ${error.message}</p>
+        </div>
+      `;
+      console.error('Erreur:', error);
+    }
+  }
+
+  // Fonction pour afficher la liste des commandes
+  function afficherListeCommandes() {
+    const container = document.getElementById('listeCommandes');
+    
+    if (commandes.length === 0) {
+      container.innerHTML = `
+        <div class="bg-yellow-50 p-4 rounded-xl text-yellow-700">
+          <p>Aucune commande payée n'a été trouvée pour aujourd'hui.</p>
+        </div>
+      `;
+      return;
+    }
+    
+    let html = '';
+    
+    commandes.forEach(commande => {
+      html += `
+        <div class="bg-white p-4 rounded-xl shadow mb-4">
+          <p class="text-green-600 font-bold">✔</p>
+          <p class="text-sm text-right italic">${commande.motif || ''}</p>
+          <p class="text-[#c3831e] font-bold">serveur : ${commande.serveur || 'Non spécifié'}</p>
+
+          <div class="my-2">
+            ${commande.items.map(article => `
+              <div class="px-3 py-1 flex items-center justify-between">
+                <div>
+                  <p class="text-sm font-semibold">${article.nom}</p>
+                  <p class="text-xs text-gray-600">${article.prix_unitaire.toLocaleString()} FCFA</p>
+                </div>
+                <div class="bg-gray-300 text-sm w-7 h-7 flex items-center justify-center rounded-full">
+                  ${article.quantite}
+                </div>
+              </div>
+            `).join('')}
+          </div>
+
+          <div class="flex justify-between items-center mt-4">
+            <p class="text-lg font-bold text-[#c3831e]">Totale :</p>
+            <p class="text-lg font-bold">${commande.total.toLocaleString()} FCFA</p>
+          </div>
+
+          <div class="flex space-x-2 mt-4">
+            ${commande.paiement === 'momo' 
+              ? '<div class="bg-green-600 text-white px-4 py-2 rounded-full font-bold">Payé en momo</div>'
+              : '<div class="bg-blue-900 text-white px-4 py-2 rounded-full font-bold">Payé en espèce</div>'
+            }
+          </div>
+        </div>
+      `;
+    });
+    
+    container.innerHTML = html;
+  }
+
+  // Fonction pour afficher la liste des dépenses
+  function afficherListeDepenses() {
+    const container = document.getElementById('listeDepenses');
+    let totalDepenses = 0;
+    
+    if (depenses.length === 0) {
+      container.innerHTML = `
+        <div class="bg-yellow-50 p-4 rounded-xl text-yellow-700">
+          <p>Aucune dépense n'a été enregistrée pour aujourd'hui.</p>
+        </div>
+      `;
+      document.getElementById('totalDepensesFooter').textContent = '0 FCFA';
+      return;
+    }
+    
+    let html = '';
+    
+    depenses.forEach(depense => {
+      const total = depense.prix_unitaire * depense.quantite;
+      totalDepenses += total;
+      
+      html += `
+        <div class="bg-white px-4 py-2 rounded-xl shadow flex justify-between items-center mb-2">
+          <div>
+            <p class="text-sm font-semibold">${depense.nom_produit}</p>
+            <p class="text-xs text-gray-600">${depense.prix_unitaire.toLocaleString()} FCFA</p>
+          </div>
+          <div class="bg-gray-300 text-sm w-7 h-7 flex items-center justify-center rounded-full font-bold">
+            ${depense.quantite}
+          </div>
+        </div>
+      `;
+    });
+    
+    container.innerHTML = html;
+    document.getElementById('totalDepensesFooter').textContent = `${totalDepenses.toLocaleString()} FCFA`;
+  }
+
+  // Fonction pour afficher la vue des commandes
   function afficherCommandes() {
     document.getElementById('vue-initiale').classList.add('hidden');
     document.getElementById('vue-commandes').classList.remove('hidden');
+    document.getElementById('vue-depenses').classList.add('hidden');
+    
+    if (commandes.length === 0) {
+      chargerCommandes();
+    }
   }
 
+  // Fonction pour afficher la vue des dépenses
   function afficherDepenses() {
     document.getElementById('vue-initiale').classList.add('hidden');
+    document.getElementById('vue-commandes').classList.add('hidden');
     document.getElementById('vue-depenses').classList.remove('hidden');
+    
+    if (depenses.length === 0) {
+      chargerDepenses();
+    }
   }
 
+  // Fonction pour retourner à l'accueil
   function retourAccueil() {
     document.getElementById('vue-initiale').classList.remove('hidden');
     document.getElementById('vue-commandes').classList.add('hidden');
     document.getElementById('vue-depenses').classList.add('hidden');
   }
+
+  // Charger les données au chargement de la page
+  document.addEventListener('DOMContentLoaded', chargerDonnees);
 </script>
+
 </body>
 </html>

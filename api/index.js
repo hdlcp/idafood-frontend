@@ -592,6 +592,48 @@ app.get("/commande_totale", requireLogin, async (req, res) => {
   }
 });
 
+// Proxy pour obtenir les statistiques des commandes par date
+app.get("/api/order-stats-date-proxy", requireLogin, async (req, res) => {
+  try {
+    // Transférer tous les paramètres de requête
+    const response = await axios.get(`${API_URL}/api/order/stats/date`, {
+      headers: {
+        Authorization: `Bearer ${req.session.token}`
+      },
+      params: req.query // Transmettre tous les paramètres de type, date, etc.
+    });
+    
+    res.json(response.data);
+  } catch (error) {
+    console.error("Erreur de récupération des stats de commande par date:", error.response?.data || error.message);
+    res.status(error.response?.status || 500).json({
+      success: false,
+      message: error.response?.data?.message || "Erreur de connexion au serveur"
+    });
+  }
+});
+
+// Proxy pour obtenir les statistiques des achats par date
+app.get("/api/purchase-stats-date-proxy", requireLogin, async (req, res) => {
+  try {
+    // Transférer tous les paramètres de requête
+    const response = await axios.get(`${API_URL}/api/purchase/stats/date`, {
+      headers: {
+        Authorization: `Bearer ${req.session.token}`
+      },
+      params: req.query // Transmettre tous les paramètres de type, date, etc.
+    });
+    
+    res.json(response.data);
+  } catch (error) {
+    console.error("Erreur de récupération des stats d'achats par date:", error.response?.data || error.message);
+    res.status(error.response?.status || 500).json({
+      success: false,
+      message: error.response?.data?.message || "Erreur de connexion au serveur"
+    });
+  }
+});
+
 // NOUVELLE ROUTE: Vérification de l'état d'authentification
 app.get("/api/auth-status", (req, res) => {
   return res.json({

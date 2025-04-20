@@ -64,68 +64,126 @@
 
   <script>
     // Affichage dynamique des champs
-    const filtreSelect = document.getElementById('filtre');
-    const champJour = document.getElementById('champ-jour');
-    const champMois = document.getElementById('champ-mois');
-    const champPeriode = document.getElementById('champ-periode');
+const filtreSelect = document.getElementById('filtre');
+const champJour = document.getElementById('champ-jour');
+const champMois = document.getElementById('champ-mois');
+const champPeriode = document.getElementById('champ-periode');
+const resultat = document.getElementById('resultat');
+const periodeTitle = document.getElementById('periode-titre');
 
-    filtreSelect.addEventListener('change', () => {
-      champJour.classList.add('hidden');
-      champMois.classList.add('hidden');
-      champPeriode.classList.add('hidden');
+// Éléments d'affichage des résultats
+const elemTotalCommandes = document.getElementById('total-commandes');
+const elemTotalMomo = document.getElementById('total-momo');
+const elemTotalEspece = document.getElementById('total-espece');
+const elemTotalDepenses = document.getElementById('total-depenses');
+const elemTotalCaisse = document.getElementById('total-caisse');
 
-      if (filtreSelect.value === 'jour') champJour.classList.remove('hidden');
-      if (filtreSelect.value === 'mois') champMois.classList.remove('hidden');
-      if (filtreSelect.value === 'periode') champPeriode.classList.remove('hidden');
-    });
+// Initialiser la date du jour
+const today = new Date().toISOString().split('T')[0];
+document.getElementById('jour').value = today;
 
-    // Données simulées
-    const dataSimulee = {
-      jour: {
-        totalCommandes: 80000,
-        totalMomo: 50000,
-        totalEspece: 30000,
-        totalDepenses: 20000
-      },
-      mois: {
-        totalCommandes: 550000,
-        totalMomo: 300000,
-        totalEspece: 250000,
-        totalDepenses: 120000
-      },
-      periode: {
-        totalCommandes: 230000,
-        totalMomo: 120000,
-        totalEspece: 110000,
-        totalDepenses: 70000
+// Initialiser le mois actuel
+const currentMonth = new Date().toISOString().split('T')[0].substring(0, 7);
+document.getElementById('mois').value = currentMonth;
+
+// Initialiser les dates pour la période (par défaut, le mois en cours)
+const firstDay = new Date(new Date().getFullYear(), new Date().getMonth(), 1).toISOString().split('T')[0];
+const lastDay = new Date(new Date().getFullYear(), new Date().getMonth() + 1, 0).toISOString().split('T')[0];
+document.getElementById('debut').value = firstDay;
+document.getElementById('fin').value = lastDay;
+
+filtreSelect.addEventListener('change', () => {
+  champJour.classList.add('hidden');
+  champMois.classList.add('hidden');
+  champPeriode.classList.add('hidden');
+
+  if (filtreSelect.value === 'jour') champJour.classList.remove('hidden');
+  if (filtreSelect.value === 'mois') champMois.classList.remove('hidden');
+  if (filtreSelect.value === 'periode') champPeriode.classList.remove('hidden');
+});
+
+// Fonction pour formater les nombres en FCFA
+function formatMoney(amount) {
+  return amount.toLocaleString('fr-FR') + ' FCFA';
+}
+
+// Fonction pour récupérer les données depuis l'API
+async function fetchStats(type, params) {
+  try {
+    // Récupérer les statistiques des commandes
+    const orderResponse = await fetch(`/api/order-stats-date-proxy?${params}`);
+    const orderData = await orderResponse.json();
+    
+    // Récupérer les statistiques des achats
+    const purchaseResponse = await fetch(`/api/purchase-stats-date-proxy?${params}`);
+    const purchaseData = await purchaseResponse.json();
+
+    if (orderData.success && purchaseData.success) {
+      // Extraire les valeurs
+      const valTotalEspeces = orderData.data.total_especes || 0;
+      const valTotalMomo = orderData.data.total_momo || 0;
+      const valTotalCommandes = valTotalEspeces + valTotalMomo;
+      const valTotalDepenses = purchaseData.data.total_achats || 0;
+      const valCaisseFinal = valTotalCommandes - valTotalDepenses;
+
+      // Mettre à jour l'interface
+      elemTotalCommandes.textContent = formatMoney(valTotalCommandes);
+      elemTotalMomo.textContent = formatMoney(valTotalMomo);
+      elemTotalEspece.textContent = formatMoney(valTotalEspeces);
+      elemTotalDepenses.textContent = formatMoney(valTotalDepenses);
+      elemTotalCaisse.textContent = formatMoney(valCaisseFinal);
+
+      // Afficher les résultats
+      resultat.classList.remove('hidden');
+      
+      // Déterminer le titre approprié
+      if (type === 'jour') {
+        const date = new Date(document.getElementById('jour').value);
+        periodeTitle.textContent = `Point du ${date.toLocaleDateString('fr-FR')}`;
+      } else if (type === 'mois') {
+        const monthValue = document.getElementById('mois').value;
+        const monthDate = new Date(monthValue + '-01');
+        periodeTitle.textContent = `Point du mois de ${monthDate.toLocaleDateString('fr-FR', { month: 'long', year: 'numeric' })}`;
+      } else if (type === 'periode') {
+        const dateDebut = new Date(document.getElementById('debut').value);
+        const dateFin = new Date(document.getElementById('fin').value);
+        periodeTitle.textContent = `Point du ${dateDebut.toLocaleDateString('fr-FR')} au ${dateFin.toLocaleDateString('fr-FR')}`;
       }
-    };
+    } else {
+      alert("Erreur lors de la récupération des données");
+      console.error("Erreur:", orderData.message || purchaseData.message);
+    }
+  } catch (error) {
+    console.error("Erreur:", error);
+    alert("Erreur de connexion au serveur");
+  }
+}
 
-    // Traitement du formulaire
-    document.getElementById('filtre-form').addEventListener('submit', (e) => {
-      e.preventDefault();
-      const filtre = filtreSelect.value;
-      const resultat = dataSimulee[filtre];
+// Traitement du formulaire
+document.getElementById('filtre-form').addEventListener('submit', async (e) => {
+  e.preventDefault();
+  const filtreType = filtreSelect.value;
+  let params = '';
 
-      if (resultat) {
-        document.getElementById('periode-titre').textContent =
-          filtre === 'jour' ? `Point du ${document.getElementById('jour').value}` :
-          filtre === 'mois' ? `Point du mois ${document.getElementById('mois').value}` :
-          `Point du ${document.getElementById('debut').value} au ${document.getElementById('fin').value}`;
+  // Construire les paramètres selon le type de filtre
+  if (filtreType === 'jour') {
+    const dateValue = document.getElementById('jour').value;
+    params = `type=jour&date=${dateValue}`;
+  } else if (filtreType === 'mois') {
+    const monthValue = document.getElementById('mois').value;
+    params = `type=mois&month=${monthValue}`;
+  } else if (filtreType === 'periode') {
+    const startDate = document.getElementById('debut').value;
+    const endDate = document.getElementById('fin').value;
+    params = `type=periode&start=${startDate}&end=${endDate}`;
+  }
 
-        document.getElementById('total-commandes').textContent = resultat.totalCommandes;
-        document.getElementById('total-momo').textContent = resultat.totalMomo;
-        document.getElementById('total-espece').textContent = resultat.totalEspece;
-        document.getElementById('total-depenses').textContent = resultat.totalDepenses;
-        document.getElementById('total-caisse').textContent =
-          resultat.totalMomo + resultat.totalEspece - resultat.totalDepenses;
+  // Appeler l'API
+  await fetchStats(filtreType, params);
+});
 
-        document.getElementById('resultat').classList.remove('hidden');
-      }
-    });
-
-    // Initialisation : afficher champ "jour" par défaut
-    filtreSelect.dispatchEvent(new Event('change'));
+// Initialisation : afficher champ "jour" par défaut
+filtreSelect.dispatchEvent(new Event('change'));
   </script>
 
 </body>
